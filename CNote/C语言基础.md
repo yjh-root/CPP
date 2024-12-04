@@ -1475,4 +1475,110 @@ num=10,p->num=1001
 Process finished with exit code 19
 ```
 
-<font size="5" color="red">从此处开始，所有的代码示例将都用C++来写</font>
+<font size="5" color="red">从此处开始，所有的代码示例将都用C++来写（包括后面所有的md文档）</font>
+
+53.C++引用：在修改函数外的某一变量时，使用了引用后，在子函数内的操作和函数外操作手法一致，这样编程效率较高，对于初学者理解也非常方便
+
+eg. C++中的引用及其他方法对比
+
+```
+#include <stdio.h>
+
+
+void noModifyNum(int b){
+    b=b+1;
+
+}
+int myModifyNum(int b){
+    b=b+1;
+    return b;
+}
+void oldModifyNum(int *b){
+    *b=*b+1;
+}
+//当你在子函数中要修改主函数中变量的值，就用引用，不需要修改，就不用
+void newModifyNum(int &b){//形参中写&,要称为引用,不是取地址
+    b=b+1;
+}
+//在子函数内修改主函数的普通变量的值
+int main() {
+    int a=10;
+    //没有对地址进行操作函数内数值b的变化并未影响到函数外a的值
+    noModifyNum(a);
+    printf("after noModifyNum a=%d\n",a);
+    //这是开发Java通常使用的方法，也能改变值，但是由于不是直接操作内存，效率较低，这里仅作补充
+    a=myModifyNum(a);
+    printf("after myModifyNum a=%d\n",a);
+    //C语言中使用*b的写法，对地址进行了操作，影响到了函数外数值的变化
+    oldModifyNum(&a);
+    printf("after oldModifyNum a=%d\n",a);
+    //C++中使用全新的引用&，与C语言达到的效果是一致的
+    newModifyNum(a);
+    printf("after newModifyNum a=%d\n",a);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+after noModifyNum a=10
+after myModifyNum a=11
+after oldModifyNum a=12
+after newModifyNum a=13
+
+Process finished with exit code 0
+```
+
+eg.<font size="5" color="red">重点，在子函数改变主函数指针变量</font>
+
+```
+#include <stdio.h>
+
+void modifyPointer(int *&p,int *q){//引用必须和变量名紧邻
+    p=q;
+}
+int main() {
+    int *p=NULL;
+    int i=10;
+    int *q=&i;
+    modifyPointer(p,q);
+    printf("after modifyPointer *p=%d\n",*p);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+after modifyPointer *p=10
+
+Process finished with exit code 0
+```
+
+eg.C++bool类型
+
+```
+#include <stdio.h>
+
+
+int main() {
+    bool a= true;
+    bool b= false;
+    printf("a=%d,b=%d\n",a,b);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+a=1,b=0
+
+Process finished with exit code 0
+```
+
+<font size="5" color="red">C语言基础，完</font>
