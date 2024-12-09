@@ -113,3 +113,200 @@ $$
 3.算法原地工作是指算法所需的辅助空间是常量，即O(1)
 
 空间复杂度O(1):n个元素数组排序，不使用额外的空间(随着n的增长而增长的空间叫额外空间)，空间复杂度就是O(1)
+
+# 3、线性表（<font color=red>逻辑结构</font>）
+
+## 3.1线性表
+
+### 3.1.1定义：
+
+由$n(n\leq0)$个相同类型的元素组成的有序集合。
+$$
+L=(a_1,a_2,\cdots,a_{i-1},a_i,a_{i+1},\cdots,a_n)
+$$
+1.线性表中的元素个数n，称为线性表的长度，当n=0时，为空表。
+
+2.$a_1$是唯一的"第一个"数据元素，$a_n$是唯一的"最后一个"数据元素
+
+3.$a_{i-1}$为$a_i$的直接<font size=5 color=red>前驱</font>,$a_{i+1}$为$a_i$的直接<font size=5 color=red>后继</font>
+
+### 3.1.2线性表的特点：
+
+1.表中元素 的个数是<font size=5 color=red>有限</font>的
+
+2.表中元素的<font size=5 color=red>数据类型都相同</font>。意味着每一个元素占用相同大小的空间
+
+3.表中元素具有逻辑上的<font size=5 color=red>顺序性</font>，在序列中各元素排序有其先后顺序
+
+## 3.2线性表的顺序表示（<font color=red>顺序表</font>）
+
+###  3.2.1顺序表的特点
+
+逻辑上相邻的两个元素在物理位置上也相邻
+
+顺序表的定义:
+
+```
+#define maxSize 50//定义线性表的长度
+typedef struct {
+    ElemType data[maxSize];//顺序表的元素
+    int len;//顺序表的当前长度
+}sqList;//顺序表的类型定义
+```
+
+优缺点:
+
+| 优点                                                     | 缺点                                       |
+| -------------------------------------------------------- | ------------------------------------------ |
+| 可以随机存取(根据表头元素地址和元素序号)表中任意一个元素 | 插入和删除操作需要移动大量元素             |
+| 存储密度高，每个结点只存储数据元素                       | 线性表变化较大时，难以确定存储空间的容量   |
+|                                                          | 存储分配需要一整段连续的存储空间，不够灵活 |
+
+### 3.2.2线性表插入操作
+
+最好情况：在表尾插入元素，不需要移动元素，时间复杂度为$O(1)$
+
+最坏情况：在表头插入元素，所有元素依次后移，时间复杂度为$O(n)$
+
+平均情况：在插入位置概率均等的情况下，平均移动元素的次数为$n/2$,时间复杂度为O(n)
+
+eg.
+
+```
+//判断插入位置i是否合法(满足1<=i<=len+1)
+    //判断存储空间是否已满(即插入x后是否会超出数组长度)
+    for (int j = L.len; j >=i ; j--) //将最后一个元素到第i个元素依次后移一位
+        L.data[j]=L.data[j-1];
+    L.data[i-1]=x;//空出的位置i放入x
+    L.len++;//线性表长度加1
+```
+
+### 3.2.3线性表删除操作
+
+最好情况：删除表尾元素，不需要移动元素，时间复杂度为$O(1)$ 
+
+最坏情况：删除表头元素，之后的所有元素依次前移，时间复杂度为$O(n)$
+
+平均情况：在删除位置概率均等的情况下，平均移动元素的次数为$n/2$,时间复杂度为O(n)
+
+eg.
+
+```
+//判断删除位置i是否合法(满足1<=i<=len+1)
+    e=L.data[i-1];//将被删除的元素赋值给e
+    for (int j = i; j <L.len ; j++) //将删除位置后的元素依次前移
+        L.data[j-1]=L.data[j];
+    L.len--;//线性表长度减1
+```
+
+### 3.2.4顺序表插入删除实战代码
+
+eg.插入删除及查找
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 50
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct {
+    ElemType data[maxSize];
+    int len;//顺序表长度
+}sqList;
+//顺序表的插入，因为L会改变，因此我们这里要引用,i是插入的位置
+bool ListInsert(sqList &L,int i,ElemType elemType){
+    //判断i是否合法
+    if(1>i||i>L.len+1){
+        return false;
+    }
+    //如果存储空间满了，不能插入
+    if(L.len==maxSize){
+        return false;
+    }
+    //把后面的元素依次往后移动，空出位，放入要插入的元素
+    for(int j=L.len;j>=i;j--){
+        L.data[j]=L.data[j-1];
+    }
+    L.data[i-1]=elemType;//放入要插入的元素
+    L.len++;//顺序表长度加1
+    return true;
+}
+//打印顺序表
+void PrintList(sqList L){
+    for (int i = 0; i < L.len; ++i) {
+        printf("%3d",L.data[i]);
+    }
+}
+//删除顺序表中的元素,i是要删除的元素的位置，del是为了获取被删除的元素的值
+bool ListDelete(sqList &L,int i,ElemType &del){
+    //判断删除的元素的位置是否合法
+    if(i<1||i>L.len)
+        return false;
+    del=L.data[i-1];//首先保存要删除元素的值
+    for (int j = i-1; j <L.len ; ++j)
+        L.data[j-1]=L.data[j];
+    L.len--;
+    return true;
+
+}
+//查找某个元素的位置，找到了就返回对应位置，没找到就就返回0
+int LocateElem(sqList L,ElemType elemType){
+    for (int i = 0; i < L.len; ++i) {
+        if(elemType==L.data[i])
+            return i+1;
+    }
+    return 0;
+}
+int main() {
+    sqList L;//定义一个顺序表
+    bool ret;//ret用来装函数的返回值
+    L.data[0]=1;//放入元素
+    L.data[1]=2;
+    L.data[2]=3;
+    L.len=3;//设置长度
+    ElemType del;//删除的元素存入del中
+    int pos;//存储元素位置
+    for (int i = 0; i < L.len; ++i) {
+        printf("%3d",L.data[i]);
+    }
+    printf("\n");
+    ret =ListInsert(L,2,60);
+    if(ret){
+        printf("insert sqList success\n");
+        PrintList(L);
+    } else
+        printf("insert sqList failed\n");
+    printf("\n");
+    ret =ListDelete(L,1,del);
+    if(ret){
+        printf("delete sqList success\n");
+        printf("delete element=%d\n",del);
+        PrintList(L);
+    } else
+        printf("delete sqList failed\n");
+    pos=LocateElem(L,60);
+    if(pos){
+        printf("find this element\n");
+        printf("element pos=%d\n",pos);
+    } else{
+        printf("find this element\n");
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+  1  2  3
+insert sqList success
+  1 60  2  3
+delete sqList success
+delete element=1
+ 60  2  3find this element
+element pos=1
+
+Process finished with exit code 0
+```
+
