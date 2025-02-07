@@ -383,3 +383,417 @@ while (p!=NULL&&p->data!=e){
 returen p;
 ```
 
+## 3.4头插法新建链表
+
+eg.
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 50
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct LNode{
+    ElemType data;//数据域
+    struct LNode *next;//指针域
+}LNode,*LinkList;
+//LNode*是结构体指针，和LinkList完全等价的
+void list_head_insert(LinkList &L){//头插法新建链表
+    L=(LinkList) malloc(sizeof (LNode));//申请头结点空间，头指针指向头结点
+    L->next=NULL;
+    ElemType x;
+    scanf("%d",&x);
+    LNode *s;//用来指向申请的新结点
+    while (x!=9999){
+        scanf("%d",&x);
+        s=(LinkList) malloc(sizeof(LNode));
+        s->data=x;
+        s->next=L->next;//s的next指向原本链表的第一个结点
+        L->next=s;//头结点的next，指向新结点
+    }
+}
+void print_list(LinkList L){//链表打印
+    L=L->next;
+    while (L!=NULL){
+        printf("data=%d,next=%p。",L->data,L->next);
+        L=L->next;
+    }
+}
+int main() {
+    LinkList L;//L是链表头指针，是结构体指针类型
+    list_head_insert(L);
+    print_list(L);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+1 2 3 4 5 9999
+data=9999,next=00000000001f4d70。data=5,next=00000000001f4d30。data=4,next=00000000001f4cf0。data=3,next=00000000001f4cb0。data=2,next=0000000000000000。
+Process finished with exit code 0
+```
+
+## 3.5尾插法新建链表
+
+eg.
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 50
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct LNode{
+    ElemType data;
+    struct LNode *next;//指向下一个结点
+}LNode,*LinkList;
+void lest_tail_insert(LinkList &L){//尾插法新建链表
+    L=(LinkList) malloc(sizeof (LNode));
+    L->next=NULL;
+    ElemType x;
+    scanf("%d",&x);
+    LNode *s,*r=L;//s是指向申请的新结点，r始终指向链表尾部
+    while (x!=9999){
+        s=(LinkList) malloc(sizeof (LNode));//为新结点申请空间
+        s ->data=x;
+        r->next=s;//新结点给尾结点的next指针
+        r=s;//r要指向新的尾部
+        scanf("%d",&x);
+    }
+    r->next=NULL;//让尾结点的next为NULL
+}
+void print_list(LinkList L){//链表打印
+    L=L->next;
+    while (L!=NULL){
+        printf("data=%d,next=%p。",L->data,L->next);
+        L=L->next;
+    }
+}
+int main() {
+    LinkList L;//L是链表头指针，是构造体指针类型
+    lest_tail_insert(L);
+    print_list(L);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+1 2 3 4 5 9999
+data=1,next=00000000006b4cf0。data=2,next=00000000006b4d30。data=3,next=00000000006b4d70。data=4,next=00000000006b4db0。data=5,next=0000000000000000。
+Process finished with exit code 0
+```
+
+## 3.6按位置查找数据和按值查找
+
+eg.按位置查找
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 50
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct LNode{
+    ElemType data;
+    struct LNode *next;//指向下一个结点
+}LNode,*LinkList;
+void lest_tail_insert(LinkList &L){//尾插法新建链表
+    L=(LinkList) malloc(sizeof (LNode));
+    L->next=NULL;
+    ElemType x;
+    scanf("%d",&x);
+    LNode *s,*r=L;//s是指向申请的新结点，r始终指向链表尾部
+    while (x!=9999){
+        s=(LinkList) malloc(sizeof (LNode));//为新结点申请空间
+        s ->data=x;
+        r->next=s;//新结点给尾结点的next指针
+        r=s;//r要指向新的尾部
+        scanf("%d",&x);
+    }
+    r->next=NULL;//让尾结点的next为NULL
+}
+void print_list(LinkList L){//链表打印
+    L=L->next;
+    while (L!=NULL){
+        printf("%3d",L->data);
+        L=L->next;
+    }
+    printf("\n");
+}
+LinkList GetElem(LinkList L,int pos){//按位置查找
+    if(pos==0)
+        return L;
+    if(pos<0)
+        return NULL;
+    int i=0;
+    while (L&&i<pos){//L!=NULL等价于L
+        L=L->next;
+        i++;
+    }
+    return L;
+}
+int main() {
+    LinkList L;//L是链表头指针，是构造体指针类型
+    LinkList search;//用来存储拿到的某一个结点
+    lest_tail_insert(L);
+    print_list(L);
+    search=GetElem(L,2);
+    if(search!=NULL){
+        printf("Succeeded in searching by serial number\n");
+        printf("%d\n",search->data);
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+1 2 3 4 5 9999
+  1  2  3  4  5
+Succeeded in searching by serial number
+2
+
+Process finished with exit code 0
+```
+
+eg.按值查找
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 50
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct LNode{
+    ElemType data;
+    struct LNode *next;//指向下一个结点
+}LNode,*LinkList;
+void lest_tail_insert(LinkList &L){//尾插法新建链表
+    L=(LinkList) malloc(sizeof (LNode));
+    L->next=NULL;
+    ElemType x;
+    scanf("%d",&x);
+    LNode *s,*r=L;//s是指向申请的新结点，r始终指向链表尾部
+    while (x!=9999){
+        s=(LinkList) malloc(sizeof (LNode));//为新结点申请空间
+        s ->data=x;
+        r->next=s;//新结点给尾结点的next指针
+        r=s;//r要指向新的尾部
+        scanf("%d",&x);
+    }
+    r->next=NULL;//让尾结点的next为NULL
+}
+void print_list(LinkList L){//链表打印
+    L=L->next;
+    while (L!=NULL){
+        printf("%3d",L->data);
+        L=L->next;
+    }
+    printf("\n");
+}
+LinkList LocateElem(LinkList L,ElemType value){//按值查询
+    while (L){
+        if(L->data==value)
+            return L;
+        L=L->next;
+    }
+    return NULL;
+}
+int main() {
+    LinkList L;//L是链表头指针，是构造体指针类型
+    LinkList search;//用来存储拿到的某一个结点
+    lest_tail_insert(L);
+    print_list(L);
+    search=LocateElem(L,6);
+    if(search!=NULL){
+        printf("Search by value succeeded\n");
+        printf("%d\n",search->data);
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+1 6 2 7 9 0 9999
+  1  6  2  7  9  0
+Search by value succeeded
+6
+
+Process finished with exit code 0
+```
+
+## 3.7在第i个位置插值
+
+eg.
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 50
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct LNode{
+    ElemType data;
+    struct LNode *next;//指向下一个结点
+}LNode,*LinkList;
+void lest_tail_insert(LinkList &L){//尾插法新建链表
+    L=(LinkList) malloc(sizeof (LNode));
+    L->next=NULL;
+    ElemType x;
+    scanf("%d",&x);
+    LNode *s,*r=L;//s是指向申请的新结点，r始终指向链表尾部
+    while (x!=9999){
+        s=(LinkList) malloc(sizeof (LNode));//为新结点申请空间
+        s ->data=x;
+        r->next=s;//新结点给尾结点的next指针
+        r=s;//r要指向新的尾部
+        scanf("%d",&x);
+    }
+    r->next=NULL;//让尾结点的next为NULL
+}
+void print_list(LinkList L){//链表打印
+    L=L->next;
+    while (L!=NULL){
+        printf("%3d",L->data);
+        L=L->next;
+    }
+    printf("\n");
+}
+LinkList GetElem(LinkList L,int pos){//按位置查找
+    if(pos==0)
+        return L;
+    if(pos<0)
+        return NULL;
+    int i=0;
+    while (L&&i<pos){//L!=NULL等价于L
+        L=L->next;
+        i++;
+    }
+    return L;
+}
+bool ListFrontInsert(LinkList &L,int i,ElemType value){//在第i个位置插值
+    LinkList p= GetElem(L,i-1);
+    if(NULL==p)
+        return false;
+    LinkList q= (LinkList)malloc(sizeof (LNode));
+    q ->data=value;
+    q->next=p->next;
+    p->next=q;
+    return true;
+}
+int main() {
+    LinkList L;//L是链表头指针，是构造体指针类型
+    LinkList search;//用来存储拿到的某一个结点
+    lest_tail_insert(L);
+    print_list(L);
+    ListFrontInsert(L,2,99);
+    print_list(L);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+3 4 5 6 7 9999
+  3  4  5  6  7
+  3 99  4  5  6  7
+
+Process finished with exit code 0
+```
+
+## 3.8删除第i个位置的元素
+
+eg.
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 50
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct LNode{
+    ElemType data;
+    struct LNode *next;
+}LNode,*LinkList;
+
+void lest_tail_insert(LinkList &L){//尾插法新建链表
+    L=(LinkList) malloc(sizeof (LNode));
+    L->next=NULL;
+    ElemType x;
+    scanf("%d",&x);
+    LNode *s,*r=L;//s是指向申请的新结点，r始终指向链表尾部
+    while (x!=9999){
+        s=(LinkList) malloc(sizeof (LNode));//为新结点申请空间
+        s ->data=x;
+        r->next=s;//新结点给尾结点的next指针
+        r=s;//r要指向新的尾部
+        scanf("%d",&x);
+    }
+    r->next=NULL;//让尾结点的next为NULL
+}
+void print_list(LinkList L){//链表打印
+    L=L->next;
+    while (L!=NULL){
+        printf("%3d",L->data);
+        L=L->next;
+    }
+    printf("\n");
+}
+LinkList GetElem(LinkList L,int pos){//按位置查找
+    if(pos==0)
+        return L;
+    if(pos<0)
+        return NULL;
+    int i=0;
+    while (L&&i<pos){//L!=NULL等价于L
+        L=L->next;
+        i++;
+    }
+    return L;
+}
+
+//删除第i个位置的元素
+bool ListDelete(LinkList L,int i){//删除时L是不会变的所以不需要加引用
+    LinkList p= GetElem(L,i-1);//拿到要删除结点的前一个结点地址
+    if(NULL==p)
+        return false;
+    LinkList q=p->next;//拿到要删除的结点指针
+    p->next=q->next;//断链
+    free(q);//释放被删除结点的空间
+    return true;
+}
+
+int main() {
+    LinkList L;
+    lest_tail_insert(L);
+    print_list(L);
+    ListDelete(L,4);
+    print_list(L);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+2 3 4 5 6 9999
+  2  3  4  5  6
+  2  3  4  6
+
+Process finished with exit code 0
+```
+
