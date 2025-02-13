@@ -797,3 +797,234 @@ D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
 Process finished with exit code 0
 ```
 
+# 4、栈与队列
+
+## 4.1栈(Stack)
+
+### 4.1.1定义：栈:只允许在一端(栈顶TOP)进行插入或删除操作的线性表(先进后出)
+
+### 4.1.2栈的基本操作:
+
+![image-20250212145034108](C语言进阶-数据结构算法题实战.assets/image-20250212145034108.png)
+
+![image-20250212145049775](C语言进阶-数据结构算法题实战.assets/image-20250212145049775.png)
+
+eg.栈的定义及初始化入栈
+
+```
+typedef struct {//栈定义
+    ElemType data[50];
+    int top;
+}SqStack;
+
+
+int main() {
+    SqStack s;
+    s.top=-1;
+    s.data[++s.top]=4;
+    return 0;
+}
+```
+
+<font color="red">[注]前加加，先做加1，然后再去做其他的操作</font>
+
+eg.出栈
+
+```
+x=s.data[s.top--]
+```
+
+eg.定义栈$\implies$初始化栈$\implies$判断栈是否为空$\implies$元素入栈$\implies$获取栈顶元素$\implies$弹栈流程
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 50
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+
+typedef struct {//栈定义
+    ElemType data[maxSize];//数组，存放栈的元素
+    int top;//始终指向栈顶的一个变量
+}SqStack;
+
+//初始化栈
+void InitStack(SqStack &s){
+    s.top=-1;//初始化栈，就是s.top=-1,让栈为空
+}
+
+//判断栈是否为空
+bool StackEmpty(SqStack s){
+    if(-1==s.top){
+        return true;
+    } else{
+        return false;
+    }
+}
+
+//入栈接口
+bool Push(SqStack &s,ElemType x){
+    //判断栈是否满了
+    if(s.top==maxSize-1){
+        return false;
+    } else{
+        s.data[++s.top]=x;
+        return true;
+    }
+}
+
+//获取栈顶元素
+bool GetTop(SqStack s,ElemType &m){
+    if(StackEmpty(s)){
+        return false;
+    }
+    m=s.data[s.top];//拿栈顶元素；
+    return true;
+}
+
+//弹出栈顶元素
+bool Pop(SqStack &s,ElemType &m){
+    if(StackEmpty(s)){
+        return false;
+    }
+    m=s.data[s.top--];//出栈
+    return true;
+}
+
+
+int main() {
+    SqStack s;
+    InitStack(s);//初始化栈
+    bool flag;
+    flag=StackEmpty(s);//判断栈是否为空
+    if(flag){
+        printf("stack is empty\n");
+    }
+    Push(s,3);//元素入栈
+    Push(s,4);
+    Push(s,5);
+    ElemType m;
+    flag=GetTop(s,m);//获取栈顶元素
+    if(flag){
+        printf("get top %d\n",m);
+    }
+    Pop(s,m);//弹出栈顶元素(弹栈)
+    if(flag){
+        printf("pop top %d\n",m);
+    }
+    flag=GetTop(s,m);//获取栈顶元素
+    if(flag){
+        printf("get top %d\n",m);
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+stack is empty
+get top 5
+pop top 5
+get top 4
+
+Process finished with exit code 0
+```
+
+## 4.2队列(Queue)
+
+### 4.2.1定义:队列(Queue)简称队，也是一种操作受限的<font color="red">线性表</font>，只允许在表的一端进行插入，而在表的另一端进行删除。向队列中插入元素称为入队或进队，删除元素称为出队和离队。<font color="red">FIFO</font>
+
+队头(Front)。允许删除的一端，又称队首。
+
+队尾(Rear)。允许插入的一端。
+
+![image-20250212155919130](C语言进阶-数据结构算法题实战.assets/image-20250212155919130.png)
+
+<font color="red">特性是先进先出(First In First Out,FIFO)</font>
+
+### 4.2.2循环队列
+
+eg.循环队列定义
+
+```
+typedef struct {//循环队列定义
+    ElemType data[maxSize];//数组，存储maxSize-1个元素
+    int front,rear;//队列头,队列尾
+}SqQueue;
+
+
+int main() {
+    SqQueue Q;
+    return 0;
+}
+```
+
+![image-20250212161154634](C语言进阶-数据结构算法题实战.assets/image-20250212161154634.png)
+$$
+[注](Q.rear+1) \% MaxSize==Q.front来判断队列是否存满，Q.rear==Q.front来判断队列是否为空
+$$
+eg.循环队列定义及入队出队
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 5
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+
+typedef struct {//循环队列定义
+    ElemType data[maxSize];//数组，存储maxSize-1个元素
+    int front,rear;//队列头,队列尾
+}SqQueue;
+
+//循环队列入队
+bool EnQueue(SqQueue &Q,ElemType x){
+    if((Q.rear+1)%maxSize==Q.front)//判断是否队满
+        return false;
+    Q.data[Q.rear]=x;//放入元素
+    Q.rear=(Q.rear+1)%maxSize;//改变队尾标记
+    return true;
+}
+
+//循环队列出队
+bool DeQueue(SqQueue &Q,ElemType &x){
+    if(Q.rear==Q.front)
+        return false;
+    x=Q.data[Q.front];//先进先出
+    Q.front=(Q.front+1)%maxSize;
+    return true;
+}
+
+int main() {
+    SqQueue Q;
+    ElemType m;
+    m=3;
+    EnQueue(Q,m);
+    DeQueue(Q,m);
+    return 0;
+}
+```
+
+## 4.3队列的链式存储
+
+### 4.3.1定义：队列的链式表示称为链队列，它实际上是一个同时<font color="red">带有 队头指针和队尾指针</font>的单链表。头指针指向队头结点，尾指针指向队尾结点，即单链表的最后一个结点。
+
+![image-20250212164151745](C语言进阶-数据结构算法题实战.assets/image-20250212164151745.png)
+
+eg.队列的链式存储定义
+
+```
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct LNode{//顺序表定义
+    ElemType data;
+    struct LNode *next;
+}LNode,*LinkList;
+
+typedef struct {
+    LNode *front,*rear;//链表头，链表尾
+}LinkQueue;//先进先出
+```
+
+<font color="red">相对于原有编写的链表增加了尾指针</font>
