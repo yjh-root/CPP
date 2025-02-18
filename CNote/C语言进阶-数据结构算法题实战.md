@@ -1007,6 +1007,103 @@ int main() {
 }
 ```
 
+eg.循环队列初始化$\implies$判断循环队列是否为空$\implies$循环队列入队$\implies$循环队列出队流程
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 5
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct {//循环队列定义
+    ElemType data[maxSize];//数组，存储maxSize-1个元素
+    int front,rear;//队列头,队列尾
+}SqQueue;
+
+//初始化循环队列
+void InitQueue(SqQueue &Q){
+    Q.front=Q.rear=0;//初始化循环队列，即使让头和尾都指向0号
+
+}
+
+//判断队列是否为空
+bool IsEmpty(SqQueue Q){
+    return Q.rear==Q.front;
+}
+
+//循环队列入队
+bool EnQueue(SqQueue &Q,ElemType x){
+    if((Q.rear+1)%maxSize==Q.front){//判断循环队列是否满了，满了就不能入队了
+        return false;
+    }
+    Q.data[Q.rear]=x;//放入元素
+    Q.rear=(Q.rear+1)%maxSize;//rear要加1，如果大于数组的最大下标，回到开头
+    return true;
+}
+
+//循环队列出队
+bool DnQueue(SqQueue &Q,ElemType &x){
+    if(IsEmpty(Q)){//队列为空，无法出队
+        return false;
+    }
+    x=Q.data[Q.front];//出队
+    Q.front=(Q.front+1)%maxSize;
+    return true;
+}
+
+int main() {
+    SqQueue Q;
+    InitQueue(Q);
+    bool ret;
+    ret=IsEmpty(Q);
+    if(ret){
+        printf("SqQueue is empty\n");
+    } else{
+        printf("SqQueue is not empty\n");
+    }
+    for (int i = 3; i <= 7; ++i) {
+        ret=EnQueue(Q,i);
+        if(ret){
+            printf("EnQueue success,EnQueue num is %d\n",i);
+        } else{
+            printf("EnQueue failed,EnQueue num is %d\n",i);
+        }
+    }
+    ElemType elemType;//存储出队元素
+    ret=DnQueue(Q,elemType);
+    if(ret){
+        printf("DnQueue success\n");
+    } else{
+        printf("DnQueue failed\n");
+    }
+    ret=EnQueue(Q,7);
+    if(ret){
+        printf("EnQueue success\n");
+    } else{
+        printf("EnQueue failed\n");
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+SqQueue is empty
+EnQueue success,EnQueue num is 3
+EnQueue success,EnQueue num is 4
+EnQueue success,EnQueue num is 5
+EnQueue success,EnQueue num is 6
+EnQueue failed,EnQueue num is 7
+DnQueue success
+EnQueue success
+
+Process finished with exit code 0
+```
+
+
+
 ## 4.3队列的链式存储
 
 ### 4.3.1定义：队列的链式表示称为链队列，它实际上是一个同时<font color="red">带有 队头指针和队尾指针</font>的单链表。头指针指向队头结点，尾指针指向队尾结点，即单链表的最后一个结点。
@@ -1028,3 +1125,85 @@ typedef struct {
 ```
 
 <font color="red">相对于原有编写的链表增加了尾指针</font>
+
+eg.队列的链式存储初始化$\implies$入队$\implies$出队流程
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 5
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct LinkNode{//顺序表定义
+    ElemType data;
+    struct LinkNode *next;
+}LinkNode,*LinkList;
+
+typedef struct {//链表队列定义
+    LinkNode *front,*rear;//链表头，链表尾
+}LinkQueue;//先进先出
+
+//队列的初始化使用的是带头结点的链表实现的
+void InitQueue(LinkQueue &Q){
+    Q.front=Q.rear=(LinkNode*)malloc(sizeof(LinkNode));//头和尾指向同一个结点
+    Q.front->next=NULL;//头结点的next指针为NULL
+}
+
+//入队
+void EnQueue(LinkQueue &Q,ElemType x){
+    LinkNode *pNew=(LinkNode*)malloc(sizeof(LinkNode));
+    pNew->data=x;
+    pNew->next=NULL;//要让next为NULL
+    Q.rear->next=pNew;//尾指针的next指向pNew,因为从尾部插入
+    Q.rear=pNew;//rear要指向新的尾部
+}
+
+//出队
+bool DnQueue(LinkQueue &Q,ElemType &x){
+    if(Q.rear==Q.front){//队列为空
+        return false;
+    }
+    LinkNode *q=Q.front->next;//链表的第一个结点，存入q
+    x=q->data;//获取要出队的元素值
+    Q.front->next=q->next;//让一个结点断链
+    if(Q.rear==q){//链表只剩余一个结点时，被删除后，要改变rear
+        Q.rear=Q.front;
+    }
+    free(q);
+    return true;
+}
+
+int main() {
+    LinkQueue Q;
+    InitQueue(Q);
+    for (int i = 3; i <= 7; ++i) {
+        EnQueue(Q,i);
+    }
+    ElemType elemType;
+    bool ret;
+    for (int i = 0; i < 7; ++i) {
+        ret=DnQueue(Q,elemType);
+        if(ret){
+            printf("DnQueue success element=%d\n",elemType);
+        } else{
+            printf("DnQueue failed\n");
+        }
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+DnQueue success element=3
+DnQueue success element=4
+DnQueue success element=5
+DnQueue success element=6
+DnQueue success element=7
+DnQueue failed
+DnQueue failed
+Process finished with exit code 0
+```
+
