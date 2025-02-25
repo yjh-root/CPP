@@ -1207,3 +1207,378 @@ DnQueue failed
 Process finished with exit code 0
 ```
 
+# 5、树与二叉树
+
+## 5.1树
+
+### 5.1.1树的定义:
+
+树是n(n>0)个结点的有限集。当n=0时，称为空树。在任意一颗非空树中应满足:
+
+(1)有且仅有一个特定的称为根的结点。
+
+(2)当n>1时，其余结点可分为m(m>0)个互不相交的有限集$T1,T2,\dots,Tm$,其中每个集合本身又是一棵树，并称为根的子树
+
+### 5.1.2树的结构:
+
+树作为一种逻辑结构，同事也是一种分层结构，具有以下两个特点:
+
+(1)树的根结点没有前驱，除根结点外的所有结点有且只有一个前驱
+
+(2)树中所有结点可以有零个或多个后继
+
+![image-20250220153612592](C语言进阶-数据结构算法题实战.assets/image-20250220153612592.png)
+
+## 5.2二叉树
+
+### 5.2.1二叉树的定义:
+
+二叉树是另一种树形结构，其特点是每个结点至多只有两颗子树(即二叉树中不存在度大于2的结点)，并且二叉树的子树有左右之分，其次序不能任意颠倒。
+
+与树相似，二叉树也以递归的形式定义。二叉树是n($n\geq 0$)个结点的有限集合:
+
+(1)或者为空二叉树，即n=0
+
+(2)或者由一个根结点和两个互不相交的被称为根的左子树和右子树组成。左子树和右子树又分别是一颗二叉树
+
+![image-20250220155129307](C语言进阶-数据结构算法题实战.assets/image-20250220155129307.png)
+
+<font color="red">满二叉树对应每一层的个数是$2^{n-1}$个，n为层数</font>
+
+<font color="red">完全二叉树要求二叉树从左往右依次放，同一层内如果右边有结点左边没有结点则不能称为完全二叉树</font>
+
+### 5.2.2二叉树的链式存储
+
+![image-20250220155952557](C语言进阶-数据结构算法题实战.assets/image-20250220155952557.png)
+
+eg.二叉树链式存储建树
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 5
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef char BiElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+
+typedef struct BiTNode{//二叉树定义
+    BiElemType data;
+    struct BiTNode *lChild;
+    struct BiTNode *rChild;
+}BiTNode,*BiTree;
+
+//tag结构体是辅助队列使用的
+typedef struct tag{
+    BiTree p;//树的某一个结点的地址值
+    struct tag *pNext;
+}tag_t,*pTag_t;
+
+int main() {
+    BiTree pNew;//用来指向新申请的树结点
+    BiTree tree=NULL;//tree是指向树根的，代表树
+    pTag_t pHead=NULL,pTail=NULL,listPNew=NULL,pCur;
+    char c;
+    while (scanf("%c",&c)){
+        if(c=='\n'){//读到换行就结束
+            break;
+        }
+        //calloc申请的空间大小是两个参数直接相乘，并对空间初始化，赋值为0
+        pNew= (BiTree)calloc(1,sizeof(BiTNode));
+        pNew->data=c;
+        listPNew=(pTag_t) calloc(1,sizeof (tag_t ));//给队列结点申请空间
+        listPNew->p=pNew;
+        //如果是树的第一个结点
+        if(NULL==tree){
+            tree=pNew;//tree指向树的根结点
+            pHead=listPNew;//第一个结点既是队列头也是队列尾
+            pTail=listPNew;
+            pCur=listPNew;//pCur要指向要进入树的父亲元素
+        } else{
+            //让元素先入队列
+            pTail->pNext=listPNew;
+            pTail=listPNew;
+            //接下来把b结点放入树中
+            if(NULL==pCur->p->lChild){
+                pCur->p->lChild=pNew;//pCur->p左孩子为空就放入左孩子
+            } else if(NULL==pCur->p->rChild){
+                pCur->p->rChild=pNew;//pCur->p右孩子为空就放入右孩子
+                pCur=pCur->pNext;//当前结点左右孩子都有了，pCur就指向下一个
+            }
+        }
+    }
+    return 0;
+}
+```
+
+### 5.2.3二叉树前序中序后序遍历
+
+1.前序遍历(深度优先遍历)(preOrder):先打印自身,再打印左子树,再打印右子树
+
+2.中序遍历(inOrder):先打印左子树,再打印当前结点,再打印右子树
+
+3.后序遍历(postOrder):先打印左子树,再打印右子树,最后打印当前结点
+
+![image-20250224141946897](C语言进阶-数据结构算法题实战.assets/image-20250224141946897.png)
+
+前序遍历结果:$abdhiejcfg$
+
+中序遍历结果:$hdibjeafcg$
+
+后序遍历结果:$hidjebfgca$
+
+eg.得到结果过程，以前序遍历为例(递归思想)
+$$
+abc\cdots\cdots第一次递归，递归以a为头结点的二叉树\\
+abdec\cdots\cdots第二次递归，递归以b为头结点的二叉树\\
+abdhiec\cdots\cdots第三次递归，递归以d为头结点的二叉树\\
+abdhiejc\cdots\cdots第四次递归，递归以e为头结点的二叉树\\
+abdhiejfgc\cdots\cdots第五次递归，递归以c为头结点的二叉树\\
+$$
+同理可求出中序遍历和后序遍历结果
+
+eg.前序中序后序遍历代码(代码简单,但是要深刻理解递归思想)
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 5
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef char BiElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+
+typedef struct BiTNode{//二叉树定义
+    BiElemType data;
+    struct BiTNode *lChild;
+    struct BiTNode *rChild;
+}BiTNode,*BiTree;
+
+//tag结构体是辅助队列使用的
+typedef struct tag{
+    BiTree p;//树的某一个结点的地址值
+    struct tag *pNext;
+}tag_t,*pTag_t;
+
+//前序遍历(先序遍历,深度优先遍历)
+void preOrder(BiTree p){
+    if(p!=NULL){
+        printf("%c",p->data);
+        preOrder(p->lChild);//打印左子树
+        preOrder(p->rChild);//打印右子树
+    }
+}
+
+//中序遍历
+void inOrder(BiTree p){
+    if(p!=NULL){
+        inOrder(p->lChild);//打印左子树
+        printf("%c",p->data);
+        inOrder(p->rChild);//打印右子树
+    }
+}
+
+//后序遍历
+void postOrder(BiTree p){
+    if(p!=NULL){
+        postOrder(p->lChild);//打印左子树
+        postOrder(p->rChild);//打印右子树
+        printf("%c",p->data);
+    }
+}
+
+int main() {
+    BiTree pNew;//用来指向新申请的树结点
+    BiTree tree=NULL;//tree是指向树根的，代表树
+    pTag_t pHead=NULL,pTail=NULL,listPNew=NULL,pCur;
+    char c;
+    while (scanf("%c",&c)){
+        if(c=='\n'){//读到换行就结束
+            break;
+        }
+        //calloc申请的空间大小是两个参数直接相乘，并对空间初始化，赋值为0
+        pNew= (BiTree)calloc(1,sizeof(BiTNode));
+        pNew->data=c;
+        listPNew=(pTag_t) calloc(1,sizeof (tag_t ));//给队列结点申请空间
+        listPNew->p=pNew;
+        //如果是树的第一个结点
+        if(NULL==tree){
+            tree=pNew;//tree指向树的根结点
+            pHead=listPNew;//第一个结点既是队列头也是队列尾
+            pTail=listPNew;
+            pCur=listPNew;//pCur要指向要进入树的父亲元素
+        } else{
+            //让元素先入队列
+            pTail->pNext=listPNew;
+            pTail=listPNew;
+            //接下来把b结点放入树中
+            if(NULL==pCur->p->lChild){
+                pCur->p->lChild=pNew;//pCur->p左孩子为空就放入左孩子
+            } else if(NULL==pCur->p->rChild){
+                pCur->p->rChild=pNew;//pCur->p右孩子为空就放入右孩子
+                pCur=pCur->pNext;//当前结点左右孩子都有了，pCur就指向下一个
+            }
+        }
+    }
+    printf("preOrder:\n");
+    preOrder(tree);
+    printf("\ninOrder:\n");
+    inOrder(tree);
+    printf("\npostOrder:\n");
+    postOrder(tree);
+    return 0;
+}
+```
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+abcdefghij//控制台输入
+preOrder:
+abdhiejcfg
+inOrder:
+hdibjeafcg
+postOrder:
+hidjebfgca
+Process finished with exit code 0
+```
+
+### 5.2.4二叉树层序遍历(层次遍历，广度优先遍历)
+
+层序遍历就是按从上到下，从左到右的顺序遍历二叉树。
+
+![image-20250224141946897](C语言进阶-数据结构算法题实战.assets/image-20250224141946897.png)
+
+层序遍历结果:$abcdefghijk$
+
+eg.层序遍历代码
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+#define maxSize 5
+typedef int ElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef char BiElemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct BiTNode{//二叉树定义
+    BiElemType data;
+    struct BiTNode *lChild;
+    struct BiTNode *rChild;
+}BiTNode,*BiTree;
+
+typedef BiTree BiTreeElemType;//队列的结构体
+
+typedef struct LinkNode{//顺序表定义
+    BiTreeElemType data;
+    struct LinkNode *next;
+}LinkNode,*LinkList;
+
+typedef struct {//链表队列定义
+    LinkNode *front,*rear;//链表头，链表尾
+}LinkQueue;//先进先出
+
+//tag结构体是辅助队列使用的
+typedef struct tag{
+    BiTree p;//树的某一个结点的地址值
+    struct tag *pNext;
+}tag_t,*pTag_t;
+
+//队列的初始化使用的是带头结点的链表实现的
+void InitQueue(LinkQueue &Q){
+    Q.front=Q.rear=(LinkNode*)malloc(sizeof(LinkNode));//头和尾指向同一个结点
+    Q.front->next=NULL;//头结点的next指针为NULL
+}
+
+//入队
+void EnQueue(LinkQueue &Q,BiTreeElemType x){
+    LinkNode *pNew=(LinkNode*)malloc(sizeof(LinkNode));
+    pNew->data=x;
+    pNew->next=NULL;//要让next为NULL
+    Q.rear->next=pNew;//尾指针的next指向pNew,因为从尾部插入
+    Q.rear=pNew;//rear要指向新的尾部
+}
+
+//出队
+bool DnQueue(LinkQueue &Q,BiTreeElemType &x){
+    if(Q.rear==Q.front){//队列为空
+        return false;
+    }
+    LinkNode *q=Q.front->next;//链表的第一个结点，存入q
+    x=q->data;//获取要出队的元素值
+    Q.front->next=q->next;//让一个结点断链
+    if(Q.rear==q){//链表只剩余一个结点时，被删除后，要改变rear
+        Q.rear=Q.front;
+    }
+    free(q);
+    return true;
+}
+
+//判断队列是否为空
+bool IsEmpty(LinkQueue Q){
+    return Q.rear==Q.front;
+}
+
+void levelOrder(BiTree T){//层次遍历、层序遍历、广度优先遍历
+    LinkQueue Q;//辅助队列
+    InitQueue(Q);//初始化队列
+    BiTree p;//存储出队的结点
+    EnQueue(Q,T);//根入队
+    while (!IsEmpty(Q)){
+        DnQueue(Q,p);
+        putchar(p->data);//等价于printf("%c",c)
+        if(p->lChild){
+            EnQueue(Q,p->lChild);//左孩子不为空就入队左孩子
+        }
+        if(p->rChild){
+            EnQueue(Q,p->rChild);//右孩子不为空就入队右孩子
+        }
+    }
+}
+
+int main() {
+    BiTree pNew;//用来指向新申请的树结点
+    BiTree tree=NULL;//tree是指向树根的，代表树
+    pTag_t pHead=NULL,pTail=NULL,listPNew=NULL,pCur;
+    char c;
+    //层次建树
+    while (scanf("%c",&c)){
+        if(c=='\n'){//读到换行就结束
+            break;
+        }
+        //calloc申请的空间大小是两个参数直接相乘，并对空间初始化，赋值为0
+        pNew= (BiTree)calloc(1,sizeof(BiTNode));
+        pNew->data=c;
+        listPNew=(pTag_t) calloc(1,sizeof (tag_t ));//给队列结点申请空间
+        listPNew->p=pNew;
+        //如果是树的第一个结点
+        if(NULL==tree){
+            tree=pNew;//tree指向树的根结点
+            pHead=listPNew;//第一个结点既是队列头也是队列尾
+            pTail=listPNew;
+            pCur=listPNew;//pCur要指向要进入树的父亲元素
+        } else{
+            //让元素先入队列
+            pTail->pNext=listPNew;
+            pTail=listPNew;
+            //接下来把b结点放入树中
+            if(NULL==pCur->p->lChild){
+                pCur->p->lChild=pNew;//pCur->p左孩子为空就放入左孩子
+            } else if(NULL==pCur->p->rChild){
+                pCur->p->rChild=pNew;//pCur->p右孩子为空就放入右孩子
+                pCur=pCur->pNext;//当前结点左右孩子都有了，pCur就指向下一个
+            }
+        }
+    }
+    printf("levelOrder:\n");
+    levelOrder(tree);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+abcdefghij\\控制台输入
+levelOrder:
+abcdefghij
+Process finished with exit code 0
+```
+
