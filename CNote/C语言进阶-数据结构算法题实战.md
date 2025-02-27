@@ -1582,3 +1582,302 @@ abcdefghij
 Process finished with exit code 0
 ```
 
+# 6、查找
+
+## 6.1顺序查找
+
+顺序查找原理:顺序查找又称线性查找，它对于顺序表和链表都是适用的。对于顺序表，可通过数组下标递增来顺序扫描每个元素；对于链表，则通过指针next来依次扫描每个元素。
+
+eg.顺序查找
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+typedef int elemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct {
+    elemType* elem;//整形指针，申请的堆空间的起始地址存入elem
+    int TableLen;//存储动态数组里边元素的个数
+}SSTable;
+
+//init进行随机数生成
+void STInit(SSTable &ST,int len){
+    //多申请了一个位置，为了存哨兵，不使用哨兵也可以
+    ST.TableLen=len+1;
+    ST.elem= (elemType*)malloc(sizeof (elemType)*ST.TableLen);
+    srand(time(NULL));//随机数生成
+    for (int i = 1; i < ST.TableLen; ++i) {//因为第0个是哨兵，所以从1随机
+        ST.elem[i]=rand()%100;//为了随机生成的数都在0~99
+    }
+}
+
+//打印顺序表
+void STPrint (SSTable ST){
+    for (int i = 1; i < ST.TableLen; ++i) {
+        printf("%3d",ST.elem[i]);
+    }
+    printf("\n");
+}
+
+//查找数据位置
+int searchSeq(SSTable ST,elemType key){
+    ST.elem[0]=key;//key存在零号位置，作为哨兵,有了哨兵，我们在循环时，可以少写一个i>=0
+    int i;
+    for (i = ST.TableLen-1; ST.elem[i]!=key; i--);
+    return i;
+
+}
+
+int main() {
+    SSTable ST;
+    elemType key;
+    int pos;//存取查询元素的位置
+    STInit(ST,10);
+    STPrint(ST);
+    printf("please input search key：\n");
+    fflush(stdout);//清空输出缓冲区
+    scanf("%d",&key);
+    pos=searchSeq(ST,key);
+    if(pos){
+        printf("find key,pos=%d\n",pos);
+    } else{
+        printf("not find\n");
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+ 76 86 71 26 18 53 15 10 75 61
+please input search key：
+15
+find key,pos=7
+
+Process finished with exit code 0
+```
+
+## 6.2折半查找(二分查找)(仅适用于有序的顺序表)
+
+折半查找的基本思想:首先将给定值key与表中中间位置的元素比较，若相等，则查找成功，返回该元素的存储位置，若不等，则所需查找的元素只c能在中间元素以外的前半部分或后半部分(例如，在茶轴表升序排序时，给定值key大于中间元素，则所查找的元素只可能在后半部分)。然后在缩小的范围内继续进行同样的查找，如此重复，直到找到为止，或确定表中没有所需查找的元素，则查找不成功，返回查找失败的信息。
+
+eg.二分查找
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+typedef int elemType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct {
+    elemType* elem;//整形指针，申请的堆空间的起始地址存入elem
+    int TableLen;//存储动态数组里边元素的个数
+}SSTable;
+
+//init进行随机数生成
+void STInit(SSTable &ST,int len){
+    //多申请了一个位置，为了存哨兵，不使用哨兵也可以
+    ST.TableLen=len+1;
+    ST.elem= (elemType*)malloc(sizeof (elemType)*ST.TableLen);
+    srand(time(NULL));//随机数生成
+    for (int i = 1; i < ST.TableLen; ++i) {//因为第0个是哨兵，所以从1随机
+        ST.elem[i]=rand()%100;//为了随机生成的数都在0~99
+    }
+}
+
+//打印顺序表
+void STPrint (SSTable ST){
+    for (int i = 1; i < ST.TableLen; ++i) {
+        printf("%3d",ST.elem[i]);
+    }
+    printf("\n");
+}
+
+//实现二分查找
+int binarySearch(SSTable L, elemType key){
+    int low=0;
+    int high=L.TableLen-1;
+    int mid;
+    while (low<=high){//low<=high,可以让mid既能取到low也能取到high
+        mid=(low+high)/2;
+        if(key>L.elem[mid]){//如果目标值大于中位数
+            low=mid+1;
+        } else if(key<L.elem[mid]){
+            high=mid-1;
+        } else{
+            return mid;
+        }
+    }
+    return -1;
+}
+
+//函数名储存的是函数的入口地址，也是一个指针，是函数指针类型
+//left指针和right指针是指向数组中的任意两个元素
+//qsort规定如果left指针指向的值大于right指针指向的值，返回正值，小于，返回负值，相当返回0；
+int compare(const void *left,const void *right){
+    return *(int *)left-*(int *)right;
+    //return *(int *)right-*(int *)left;//从大到小排序
+};
+
+int main() {
+    SSTable ST;
+    STInit(ST,10);
+    STPrint(ST);
+    qsort(ST.elem,ST.TableLen,sizeof (elemType), compare);//排序
+    STPrint(ST);
+    elemType key;
+    printf("please input search key\n");
+    fflush(stdout);//清空输出缓冲区,要不然毛都打印不出来
+    scanf("%d",&key);
+    fflush(stdout);//清空输出缓冲区，要不然毛都打印不出来
+    int post=binarySearch(ST,key);
+    if(post!=-1){
+        printf("find key is %d\n",post);
+    } else{
+        printf("not found\n");
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+ 67 11 62 15  4 22 94 84 75 41
+  4 11 15 22 41 62 67 75 84 94
+please input search key
+11//控制台输入
+find key is 2
+
+Process finished with exit code 0
+```
+
+## 6.3二叉排序树
+
+### 6.3.1定义
+
+二叉排序树(也称二叉查找树)或者是一颗空树，或者是具有下列特性的二叉树:
+
+(1) 若左子树非空，则左子树上所有结点的值均小于根结点的值
+
+(2) 若右子树非空，则右子树上所有结点的值均大于根结点的值
+
+(3)左、右子树也分别是一颗二叉排序树
+
+![image-20250227152400551](C语言进阶-数据结构算法题实战.assets/image-20250227152400551.png)
+
+eg.二叉排序树新建，中序遍历，查找
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+typedef int keyType;//让顺序表存储其他类型元素时，可以快速完成代码修改
+typedef struct BSTNode{
+    keyType key;
+    struct BSTNode *lChild,*rChild;
+}BSTNode,*BiTree;
+
+//递归创建二叉排序树
+int BSTInsert1(BiTree &T,keyType key){
+    if(NULL==T){//为新结点申请空间，第一个结点作为树根,后面递归再进入的不是树根，是为叶子结点
+        T=(BiTree) malloc(sizeof(BSTNode));
+        T->key=key;
+        T->lChild=T->rChild=NULL;
+        return 0;//代表插入成功
+    } else if(key==T->key)
+        return -1;//发现相同元素，就不插入
+    else if(key<T->key)//如果要插入的结点，小于当前结点
+        //函数调用结束后，左孩子和原来的父亲会关联起来，巧妙利用了引用机制
+        return BSTInsert1(T->lChild,key);
+    else
+        return BSTInsert1(T->rChild,key);
+}
+
+//非递归创建二叉排序树
+int BSTInsert(BiTree &T,keyType key){
+    BiTree treeNew= (BiTree)calloc(1,sizeof(BSTNode));//新结点申请空间
+    treeNew->key=key;//把值放入
+    if(NULL==T){//树为空，新结点作为树根
+        T=treeNew;
+        return 0;
+    }
+    BiTree p=T,parent;//用来查找树
+    while (p){
+        parent=p;//parent用来存p的父亲
+        if(key>p->key){
+            p=p->rChild;
+        } else if(key<p->key){
+            p=p->lChild;
+        } else{
+            return -1;//相等的元素不可以放入查找树(考研不会考)
+        }
+    }
+    //接下来要判断放到父亲的左边还是右边
+    if(key>parent->key){//放到父亲的右边
+        parent->rChild=treeNew;
+    } else{//放到父亲的左边
+        parent->lChild=treeNew;
+    }
+    return 0;
+}
+
+//树中不放入相等元素
+void creatBST(BiTree &T,keyType* str,int len){
+    for (int i = 0; i < len; ++i) {
+        BSTInsert(T,str[i]);//把某一结点放入二叉排序树
+    }
+
+}
+
+//中序遍历
+void inOrder(BiTree T){
+    if(NULL!=T){
+        inOrder(T->lChild);
+        printf("%3d",T->key);
+        inOrder(T->rChild);
+    }
+}
+
+BiTree BSTSearch(BiTree T,keyType k,BiTree &parent){
+    parent=NULL;//存储要找的结点的父亲
+    while (T!=NULL&&k!=T->key){
+        parent=T;
+        if(k<T->key)
+            T=T->lChild;//比当前结点小，就左边找
+        else
+            T=T->rChild;//比当前结点大，就右边找
+    }
+    return T;
+}
+//二叉排序树新建，中序遍历，查找
+int main() {
+
+    BiTree T=NULL;//树根
+    keyType str[7]={97,54,87,51,22,98,15};
+    creatBST(T,str,7);
+    inOrder(T);//中序遍历二叉查找树是由小到大的
+    printf("\n");
+    BiTree search,parent;
+    search=BSTSearch(T,98,parent);
+    if(search){
+        printf("find key %d\n",search->key);
+    } else{
+        printf("not find");
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+ 15 22 51 54 87 97 98
+find key 98
+
+Process finished with exit code 0
+```
+
