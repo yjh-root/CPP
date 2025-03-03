@@ -1,98 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-typedef int keyType;//让顺序表存储其他类型元素时，可以快速完成代码修改
-typedef struct BSTNode{
-    keyType key;
-    struct BSTNode *lChild,*rChild;
-}BSTNode,*BiTree;
 
-//递归创建二叉排序树
-int BSTInsert1(BiTree &T,keyType key){
-    if(NULL==T){//为新结点申请空间，第一个结点作为树根,后面递归再进入的不是树根，是为叶子结点
-        T=(BiTree) malloc(sizeof(BSTNode));
-        T->key=key;
-        T->lChild=T->rChild=NULL;
-        return 0;//代表插入成功
-    } else if(key==T->key)
-        return -1;//发现相同元素，就不插入
-    else if(key<T->key)//如果要插入的结点，小于当前结点
-        //函数调用结束后，左孩子和原来的父亲会关联起来，巧妙利用了引用机制
-        return BSTInsert1(T->lChild,key);
-    else
-        return BSTInsert1(T->rChild,key);
-}
 
-//非递归创建二叉排序树
-int BSTInsert(BiTree &T,keyType key){
-    BiTree treeNew= (BiTree)calloc(1,sizeof(BSTNode));//新结点申请空间
-    treeNew->key=key;//把值放入
-    if(NULL==T){//树为空，新结点作为树根
-        T=treeNew;
-        return 0;
-    }
-    BiTree p=T,parent;//用来查找树
-    while (p){
-        parent=p;//parent用来存p的父亲
-        if(key>p->key){
-            p=p->rChild;
-        } else if(key<p->key){
-            p=p->lChild;
+//二分查找中位数
+int midSearch(int *A,int *B,int n){
+    //分别表示序列A和B的首位数，末位数和中位数,s是start简写，d是end的简写
+    int s1=0,d1=n-1,m1,s2=0,d2=n-1,m2;
+    //循环判断结束条件是，两个数组均不断删除最后均只能剩余一个元素
+    while (s1!=d1||s2!=d2){
+        m1=(s1+d1)/2;
+        m2=(s2+d2)/2;
+        if(A[m1]==B[m2]){
+            return A[m1];
+        } else if(A[m1]<B[m2]){
+            if((s1+d1)%2==0){//若元素个数为奇数，这里注意数组下标从0开始
+                s1=m1;//舍弃A中间点以前的部分保留中间点
+                d2=m2;//舍弃B中间点以后的部分保留中间点
+            } else{//元素个数为偶数
+                s1=m1+1;//舍弃A中间点及中间点以前的部分
+                d2=m2;//舍弃B中间点以前的部分
+            }
         } else{
-            return -1;//相等的元素不可以放入查找树(考研不会考)
+            if((s1+d1)%2==0){//若元素个数为奇数，这里注意数组下标从0开始
+                d1=m1;//舍弃A中间点以后的部分保留中间点
+                s2=m2;//舍弃B中间点以前的部分保留中间点
+            } else{//元素个数为偶数
+                d1=m1;//舍弃A中间点以后的部分
+                s2=m2+1;//舍弃B中间点及中间点以前的部分
+            }
         }
     }
-    //接下来要判断放到父亲的左边还是右边
-    if(key>parent->key){//放到父亲的右边
-        parent->rChild=treeNew;
-    } else{//放到父亲的左边
-        parent->lChild=treeNew;
-    }
-    return 0;
+    return A[s1]<B[s2]?A[s1]:B[s2];
 }
-
-//树中不放入相等元素
-void creatBST(BiTree &T,keyType* str,int len){
-    for (int i = 0; i < len; ++i) {
-        BSTInsert(T,str[i]);//把某一结点放入二叉排序树
-    }
-
-}
-
-//中序遍历
-void inOrder(BiTree T){
-    if(NULL!=T){
-        inOrder(T->lChild);
-        printf("%3d",T->key);
-        inOrder(T->rChild);
-    }
-}
-
-BiTree BSTSearch(BiTree T,keyType k,BiTree &parent){
-    parent=NULL;//存储要找的结点的父亲
-    while (T!=NULL&&k!=T->key){
-        parent=T;
-        if(k<T->key)
-            T=T->lChild;//比当前结点小，就左边找
-        else
-            T=T->rChild;//比当前结点大，就右边找
-    }
-    return T;
-}
-//二叉排序树新建，中序遍历，查找
 int main() {
-
-    BiTree T=NULL;//树根
-    keyType str[7]={97,54,87,51,22,98,15};
-    creatBST(T,str,7);
-    inOrder(T);//中序遍历二叉查找树是由小到大的
-    printf("\n");
-    BiTree search,parent;
-    search=BSTSearch(T,98,parent);
-    if(search){
-        printf("find key %d\n",search->key);
-    } else{
-        printf("not find");
-    }
+    int A[]={11,13,15,17,19};
+    int B[]={2,4,6,8,20};
+    int mid=midSearch(A,B,5);
+    printf("mid=%d\n",mid);
     return 0;
 }

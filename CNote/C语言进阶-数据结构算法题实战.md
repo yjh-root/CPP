@@ -1768,7 +1768,7 @@ Process finished with exit code 0
 
 ![image-20250227152400551](C语言进阶-数据结构算法题实战.assets/image-20250227152400551.png)
 
-eg.二叉排序树新建，中序遍历，查找
+eg.二叉排序树新建，中序遍历，查找，删除
 
 ```
 #include <stdio.h>
@@ -1852,7 +1852,39 @@ BiTree BSTSearch(BiTree T,keyType k,BiTree &parent){
     }
     return T;
 }
-//二叉排序树新建，中序遍历，查找
+
+//通过递归删除树结点
+void deleteNode(BiTree &root,keyType x){
+    if(NULL==root){
+        return;
+    }
+    if(root->key>x){//当前结点大于要删除的结点就在左子树找
+        deleteNode(root->lChild,x);
+    } else if(root->key<x){//当前结点小于要删除的结点就在右子树找
+        deleteNode(root->rChild,x);
+    } else{//查找到了删除结点
+        if(root->lChild==NULL){//左子树为空，右子树直接顶上去
+            BiTree tempNode=root;//用临时的存这的目的是一会要free
+            root=root->rChild;
+            free(tempNode);
+        } else if(root->rChild==NULL){//右子树为空，左子树直接顶上去
+            BiTree tempNode=root;//用临时的存这的目的是一会要free
+            root=root->lChild;
+            free(tempNode);
+        } else{//两边都不为空
+            //一般的删除策略是左子树的最大数据或右子树的最小数据
+            //代替要删除的结点(这里采用查找左子树最大数据来代替，左子树的最有结点)
+            BiTree tempNode=root->lChild;
+            while (tempNode->rChild!=NULL){//向右找到最大的
+                tempNode=tempNode->rChild;
+            }
+            root->key=tempNode->key;//把tempNode对应的值替换到要删除的值的位置上
+            deleteNode(root->lChild,tempNode->key);//在左子树中找到tempNode的值，把其删除
+
+        }
+    }
+}
+//二叉排序树新建，中序遍历，查找，删除
 int main() {
 
     BiTree T=NULL;//树根
@@ -1865,8 +1897,10 @@ int main() {
     if(search){
         printf("find key %d\n",search->key);
     } else{
-        printf("not find");
+        printf("not find\n");
     }
+    deleteNode(T,54);//删除某个结点
+    inOrder(T);
     return 0;
 }
 ```
@@ -1877,7 +1911,7 @@ ie.
 D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
  15 22 51 54 87 97 98
 find key 98
-
+ 15 22 51 87 97 98
 Process finished with exit code 0
 ```
 
