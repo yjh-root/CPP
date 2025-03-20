@@ -1915,3 +1915,537 @@ find key 98
 Process finished with exit code 0
 ```
 
+# 7、排序
+
+## 7.1排序分类
+
+排序算法分为交换类排序，插入类排序，选择类排序，归并类排序
+
+1.交换排序分为:冒泡排序和快速排序
+
+2.插入排序分为:直接插入排序、折半插入排序和希尔排序
+
+3.选择排序分为:简单选择排序、堆排序(重要)
+
+## 7.2冒泡排序
+
+定义:冒泡排序的基本思想是，从后往前(或从前往后)两两比较相邻元素的值，$(若A[j-1]>A[j])$,则交换他们，直到序列比较完，我们称它为第一趟冒泡，结果是将最小的元素交换到待排序列的第一个位置，关键字最小的元素如气泡一般逐渐往上"漂浮"直至"水面"。下一趟冒泡时，前一趟确定的最小元素不再参与比较，每趟冒泡的结果是把序列中的最小元素放到了序列的最终位置$\dots\dots$这样最多做n-1趟冒泡就能把所有的元素排好序
+
+![image-20250304221734119](C语言进阶-数据结构算法题实战.assets/image-20250304221734119.png)
+
+eg.冒泡排序代码
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+typedef int elemType;
+typedef struct {
+    elemType *elem;//存储元素的起始地址
+    int tableLen;//元素个数
+}SSTable;
+
+//初始化数组，随机生成10个元素存入数组中
+void STInit(SSTable &ST,int len){
+    ST.tableLen=len;
+    ST.elem=(elemType *)malloc(sizeof (elemType)*ST.tableLen);//申请一块堆空间，当数组用
+    srand(time(NULL));//随机数生成，每一次执行代码就会得到随机的10个元素
+    for (int i = 0; i < ST.tableLen; ++i) {
+        ST.elem[i]=rand()%100;//生成的是0-99之间
+    }
+}
+
+//打印数组中的元素
+void STPrint(SSTable ST){
+    for (int i = 0; i < ST.tableLen; ++i) {
+        printf("%3d",ST.elem[i]);
+    }
+    printf("\n");
+}
+
+//交换两个元素
+void swap(int &a,int &b){
+    int tmp;
+    tmp=a;
+    a=b;
+    b=tmp;
+}
+//冒泡排序(排序往往都是用两层循环的)
+//优先去写内层循环再写外层循环
+void bubbleSort(elemType *A,int n){
+    int i,j;
+    bool flag;
+    for(i=0;i<n-1;i++){//外层控制的是有序数的数目
+        flag= false;
+        for (j=n-1;j>i;j--){//内层控制比较和交换
+            if(A[j-1]>A[j]){
+                swap(A[j-1],A[j]);
+                flag= true;
+            }
+        }
+        if(flag== false)//如果一趟比较没有发生任何交换，说明有序，提前结束排序
+            return;
+    }
+}
+int main() {
+    SSTable ST;
+    STInit(ST,10);
+    STPrint(ST);
+    bubbleSort(ST.elem,10);
+    STPrint(ST);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+ 63 77 79 89 66 54 75 42  1 41
+  1 41 42 54 63 66 75 77 79 89
+
+Process finished with exit code 0
+```
+
+最后我们计算一下时间复杂度和空间复杂度,时间复杂度其实就是程序实际的运行次数，可以看到内存是j>i,外层i的值是从0到N-1，所以程序的总运行次数是$1+2+3+\cdots+(N-1)$,即从1一直加到N-1，这是等差数列求和，得到结果是$\frac{N(N-1)}{2}$,即总运行了这么多次，忽略了低阶项和高阶项的首项系数，因此时间复杂度是$O(n^2)$,因为未使用额外的空间(额外空间必须雨输入元素的个数N相关)，所以空间复杂度为O(1)
+
+加上哨兵flag后，如果数组本身有序，那么就是最好的时间复杂度O(n)
+
+## 7.3快速排序
+
+定义:快速排序的核心是分治思想:假设我们的目标依然是按从小到大的顺序排列，我们找到数组中的一个分割值，把比分割值小的数都放在数组的左边，把比分割值大的数都放在数组的右边，这样分割值的位置就被确定。数组一分为二，我们只需排前一半数组和后一半数组，复杂度直接减半。采用这种思想，不断地进行递归，最终分割得只剩一个元素时，整个序列自然就是有序的。
+
+eg.快速排序代码
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+typedef int elemType;
+typedef struct {
+    elemType *elem;//存储元素的起始地址
+    int tableLen;//元素个数
+}SSTable;
+
+//初始化数组，随机生成10个元素存入数组中
+void STInit(SSTable &ST,int len){
+    ST.tableLen=len;
+    ST.elem=(elemType *)malloc(sizeof (elemType)*ST.tableLen);//申请一块堆空间，当数组用
+    srand(time(NULL));//随机数生成，每一次执行代码就会得到随机的10个元素
+    for (int i = 0; i < ST.tableLen; ++i) {
+        ST.elem[i]=rand()%100;//生成的是0-99之间
+    }
+}
+
+//打印数组中的元素
+void STPrint(SSTable ST){
+    for (int i = 0; i < ST.tableLen; ++i) {
+        printf("%3d",ST.elem[i]);
+    }
+    printf("\n");
+}
+
+//分割(快排的核心函数)
+//挖坑法
+int partition(elemType *A,int low,int high){
+    elemType pivot=A[low];//拿最左边的元素作为分割值，并存储下来
+    while (low<high){
+        while (low<high&&A[high]>=pivot)//从后往前遍历，找到一个比分割值小的
+            high--;
+        A[low]=A[high];//把比分割值小的那个元素放到A[low]
+        while (low<high&&A[low]<=pivot)//从前往后遍历，找到一个比分割值大的
+            low++;
+        A[high]=A[low];//把比分割值大的那个元素放到A[high],因为刚才high位置的元素已经放到了low位置
+    }
+    A[low]=pivot;//把分割值放到中间位置，因为左边都比他小，右边都比他大
+    return low;
+}
+
+//快速排序
+void quickSort(elemType *A,int low,int high){
+    if(low<high){
+        int pivotPos= partition(A,low,high);//存储分割值的位置
+        quickSort(A,low,pivotPos-1);//前一半继续递归排好
+        quickSort(A,pivotPos+1,high);
+    }
+}
+int main() {
+    SSTable ST;
+    STInit(ST,10);
+    STPrint(ST);
+    quickSort(ST.elem,0,9);
+    STPrint(ST);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+ 38 59 85 60 63 67  1 26 32 43
+  1 26 32 38 43 59 60 63 67 85
+
+Process finished with exit code 0
+```
+
+假如每次快速排序数组都被平均地一分为二，那么可以得出$QuickSort$递归的次数是$\log_{2}{n}$,第一次$patition$遍历次数为n，分为两个数组后，每个数组遍历$\frac{n}{2}$次，加起来还是n，因此时间复杂度是$O\log_{2}{n}$,因为计算机时二进制的，所以在复试面试回答复杂度或与人交流时，提刀复杂度一版直接讲$O(n\log{n})$,而不带下标2，快速排序最差的时间复杂度为什么是$n^2$呢？因为数组本身从小到大有序时，如果每次我们仍然用最左边的数作为分割值，那么每次数组都不会二分，导致递归n次，所以快速排序最坏的时间复杂度为n的平方。当然，，为了避免这种情况，有时会首先随机选择一个下标，先将对应下标的值与最左边的元素交换，再进行$partition$操作从而极大地降低出现最坏时间复杂度的概率，但是仍然不能完全避免。
+
+因此快排最好和平均时间复杂度时$O(n\log{n})$,最差是$O(n^2)$
+
+快排的空间复杂度是$O(\log_2n)$，因为递归的次数是$\log_2n$,而每次递归的形参都是需要占用空间的
+
+## 7.4直接插入排序
+
+定义:如果一个序列只有一个数，那么该序列自然是有序的。插入排序首先将第一个数视为有序序列，然后把后面9个数视为要依次插入的序列。首先，我们通过外层循环控制要插入的数，用$inserVal$保留要插入的值87，我们比较$arr[0]$是否大于$arr[1]$，即3是否大于87，由于不大于，因此不发生移动，这时有序序列是$3,87$。接着将数值2插入有序序列，首先将2赋值给$inserVal$，这时判断87是否大于2，因为87大于2，所以87向后移将2覆盖，然后判断3是否大于2，因为3大于2，所以3移动到87所在的位置，内层循环结束，这时将2赋值给$arr[0]$的位置，得到下表中第二次插入后的效果。
+
+![image-20250311221052535](C语言进阶-数据结构算法题实战.assets/image-20250311221052535.png)
+
+继续循环会将数依次插入有序序列，最终使得整个数组有序。插入排序主要用在部分数有序的场景，例如手机通讯录时时刻刻都是有序的，新增一个电话号码时，以插入排序的方法将其插入原有的有序序列，这样就降低了复杂度。
+
+eg.插入排序代码
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+typedef int elemType;
+typedef struct {
+    elemType *elem;//存储元素的起始地址
+    int tableLen;//元素个数
+}SSTable;
+
+//初始化数组，随机生成10个元素存入数组中
+void STInit(SSTable &ST,int len){
+    ST.tableLen=len;
+    ST.elem=(elemType *)malloc(sizeof (elemType)*ST.tableLen);//申请一块堆空间，当数组用
+    srand(time(NULL));//随机数生成，每一次执行代码就会得到随机的10个元素
+    for (int i = 0; i < ST.tableLen; ++i) {
+        ST.elem[i]=rand()%100;//生成的是0-99之间
+    }
+}
+
+//打印数组中的元素
+void STPrint(SSTable ST){
+    for (int i = 0; i < ST.tableLen; ++i) {
+        printf("%3d",ST.elem[i]);
+    }
+    printf("\n");
+}
+
+void insertSort(elemType *A,int n){
+    int i,j,insertVal;
+    for (i = 1; i < n; ++i) {//外层控制要插入的数
+        insertVal=A[i];//保存要插入的数
+        //内层控制比较，j要大于等于0，同时arr[j]大于insertVal时,arr[j]元素向后覆盖
+        for (j = i-1; j>=0 && A[j]>insertVal; j--) {
+            A[j+1]=A[j];
+        }
+        A[j+1]=insertVal;//把要插入的元素放到对应的位置
+    }
+}
+
+int main() {
+    SSTable ST;
+    STInit(ST,10);
+    STPrint(ST);
+    insertSort(ST.elem,10);
+    STPrint(ST);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+ 46 28 59 38  0 53 78  0  7 37
+  0  0  7 28 37 38 46 53 59 78
+
+Process finished with exit code 0
+```
+
+随着有序序列的不断增加，插入排序比较次数也会增加，插入排序的执行次数也是从1加到$N-1$,总运行次数为$\frac{N(N-1)}{2}$,时间复杂度依然是$O(n^2)$,因为未使用额外的空间(额外空间必须与输入元素的个数N相关)，所以空间复杂度是$O(1)$。如果数组本身有序，那么就是最好的时间复杂度$O(n)$。
+
+## 7.5选择排序
+
+定义:假设排序表为$L[1\cdots n]$,第$i$趟排序即从$L[1\cdots n]$中选择关键字最小的元素与$L(i)$交换，每一趟排序可以确定一个元素的最终位置，这样经过$n-1$趟排序就可以使得整个排序表有序。
+
+首先假设第零个元素是最小值，把下标0赋值给$min$($min$记录最小的元素的下标)，内层比较时，从1号元素一直比较到9号元素，谁更小，就把它的下标赋给$min$,一轮比较结束后，将$min$对应位置的元素与元素$i$交换，如下表所示。第一轮确认2最小，将2与数组开头的元素3交换，第二轮我们最初认为87最小，经过一轮比较，发现3最小，这时将87与3交换。持续进行，最终使数组有序。
+
+![image-20250311225903509](C语言进阶-数据结构算法题实战.assets/image-20250311225903509.png)
+
+eg.选择排序代码
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+typedef int elemType;
+typedef struct {
+    elemType *elem;//存储元素的起始地址
+    int tableLen;//元素个数
+}SSTable;
+
+//初始化数组，随机生成10个元素存入数组中
+void STInit(SSTable &ST,int len){
+    ST.tableLen=len;
+    ST.elem=(elemType *)malloc(sizeof (elemType)*ST.tableLen);//申请一块堆空间，当数组用
+    srand(time(NULL));//随机数生成，每一次执行代码就会得到随机的10个元素
+    for (int i = 0; i < ST.tableLen; ++i) {
+        ST.elem[i]=rand()%100;//生成的是0-99之间
+    }
+}
+
+//打印数组中的元素
+void STPrint(SSTable ST){
+    for (int i = 0; i < ST.tableLen; ++i) {
+        printf("%3d",ST.elem[i]);
+    }
+    printf("\n");
+}
+
+//交换元素
+void swap(elemType &a,elemType &b){
+    elemType tmp;
+    tmp=a;
+    a=b;
+    b=tmp;
+}
+
+void selectionSort(elemType *A,int n){
+    int i,j,min;//min记录最小的元素的下标
+    for(i=0;i<n-1;i++){
+        min=i;//我们认为i号元素最小
+        for(j=i+1;j<n;j++){//找到从i开始到最后的序列的最小值的下标
+            if(A[j]<A[min]){//当某个元素A[j]小于最小元素时
+                min=j;//将下标j赋值给min,min就记录下俩了最小值的下标
+            }
+        }
+        swap(A[i],A[min]);//遍历完毕找到最小值的位置后，与A[i]交换，这样最小值就到了最前面
+    }
+}
+
+int main() {
+    SSTable ST;
+    STInit(ST,10);
+    STPrint(ST);
+    selectionSort(ST.elem,10);
+    STPrint(ST);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+  4 28 56 66 93 69 42 43 57  4
+  4  4 28 42 43 56 57 66 69 93
+
+Process finished with exit code 0
+```
+
+选择排序虽然减少了交换次数，但是循环比较的次数依然和冒泡排序的数量是一样的，都是从1到$N-1$,总运行次数为$\frac{N(N-1)}{2}$。我们忽略循环内语句的数量，因为我们在计算时间复杂度时，主要考虑N有关的循环，如果循环内交换的多，例如5条语句，那么最终得到的无非是$5n^2$;循环内交换的少，例如有两条语句，那么得到的就是$2n^2$，但是时间复杂度计算是忽略首项系数的，因此最终还是$O(n^2)$。因此，选择排序的时间复杂度依然是$O(n^2)$,因为未使用额外的空间(额外的空间必须与输入元素的个数$N$相关)，所以空间复杂度是$O(1)$。<font color="red">另外考研初试问时间复杂度，直接写最终结构即可，不用分析过程，除非清晰说明需要给出计算过程，或者分析过程(但是目前一直没有这个要求)</font>
+
+## 7.6堆排序
+
+堆的定义:堆($Heap$)是计算机科学中的一种特殊的树状结构。若满足以下特点，则可称为堆:"给定堆中任意结点P和C，若P是C的父结点，则P的值小于等于(或大于等于)C的值。"若父结点的值恒小于等于子结点的值，则该堆称为最小堆(min heap);反之，若父结点的值恒大于等于子结点，则称该堆为最大堆(max heap)。堆中最顶端的那个结点称为根结点(root node),根结点本身没有父结点(parent node)。工作中，我们将最小堆称为小根堆或小顶堆，把最大堆称为大根堆或大顶堆
+
+eg.假设我们有3,87,2,93,78,56,61,38,12,40共10个元素，我们将这10个元素组成一个完全二叉树，这里采用层次建树法，虽然只有一个数组存储元素，**但是我们能将二叉树中任意一个我贼之的元素对应数组下标上，我们将二叉树中每个元素对应到数组下标的这种数据结构称为堆**，比如<font color="red">最后一个父元素的下标是N\2-1，也就是a[4],对应的值是78</font>。为什么是N\2-1？因为这是层次建立一颗完全二叉树的特性。可以这样记忆:如果父结点的下标是dad，那么父结点对应的左子树下标值是2*dad+1,接着，依次将每颗子树都调整为父结点的最大值，最终将整棵树变为一个大根堆
+
+![image-20250312225026812](C语言进阶-数据结构算法题实战.assets/image-20250312225026812.png)
+
+![image-20250312225214193](C语言进阶-数据结构算法题实战.assets/image-20250312225214193.png)
+
+![image-20250312225437335](C语言进阶-数据结构算法题实战.assets/image-20250312225437335.png)
+
+eg.堆排序代码
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+typedef int elemType;
+typedef struct {
+    elemType *elem;//存储元素的起始地址
+    int tableLen;//元素个数
+}SSTable;
+
+//初始化数组，随机生成10个元素存入数组中
+void STInit(SSTable &ST,int len){
+    ST.tableLen=len;
+    ST.elem=(elemType *)malloc(sizeof (elemType)*ST.tableLen);//申请一块堆空间，当数组用
+    srand(time(NULL));//随机数生成，每一次执行代码就会得到随机的10个元素
+    for (int i = 0; i < ST.tableLen; ++i) {
+        ST.elem[i]=rand()%100;//生成的是0-99之间
+    }
+}
+
+//打印数组中的元素
+void STPrint(SSTable ST){
+    for (int i = 0; i < ST.tableLen; ++i) {
+        printf("%3d",ST.elem[i]);
+    }
+    printf("\n");
+}
+
+//交换元素
+void swap(elemType &a,elemType &b){
+    elemType tmp;
+    tmp=a;
+    a=b;
+    b=tmp;
+}
+
+//把某个子树调整为大根堆(堆排序的核心)
+void adjustDown(elemType A[],int k,int len){
+    int dad=k;//父亲的下标
+    int son=2*dad+1;//左孩子的下标
+    while (son<len){
+        if(son+1<len && A[son]<A[son+1]){//如果左孩子小于右孩子
+            son++;//拿右孩子
+        }
+        if(A[son]>A[dad]){//如果孩子大于父亲
+            swap(A[son],A[dad]);//交换
+            dad=son;//son从新作为dad，去判断下面的子树是否符合大根堆
+            son=2*dad+1;
+        } else
+            break;
+    }
+}
+
+void heapSort(elemType A[],int len){
+    int i;
+    //把堆调整为大根堆
+    for(i=len/2-1;i>=0;i--){
+        adjustDown(A,i,len);
+    }
+    swap(A[0],A[len-1]);//交换根部元素和最后一个元素
+    for (i=len-1;i>1;i--){//i代表的是剩余无序元素数组的长度
+        adjustDown(A,0,i);//调整剩余元素为大根堆
+        swap(A[0],A[i-1]);//交换根部元素和无序元素数组的最后一个元素
+    }
+}
+
+int main() {
+    SSTable ST;
+    STInit(ST,10);
+    elemType A[10]={3,87,2,93,78,56,61,38,12,40};
+    memcpy(ST.elem,A,sizeof (A));
+    STPrint(ST);
+    heapSort(ST.elem,10);
+    STPrint(ST);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+  3 87  2 93 78 56 61 38 12 40
+  2  3 12 38 40 56 61 78 87 93
+
+Process finished with exit code 0
+```
+
+$adjustDoown$函数 的循环次数是$\log_2n$,$heapSort$函数的第一个$for$循环了$\frac{n}{2}$次，第二个$for$循环了$n$次，总计$\frac{3}{2}n\log_2n$次，因此时间复杂度是$O(n\log_2n)$
+
+堆排序最好、最坏、平均时间复杂度都是$O(n\log_2n)$
+
+堆排序的空间复杂度是$O(1)$,因为没有使用与n相关的额外空间
+
+## 7.7归并排序
+
+原理:
+
+ ![image-20250319145231712](C语言进阶-数据结构算法题实战.assets/image-20250319145231712.png)
+
+如上图所示，我们把每两个元素归为一组，进行小组内排序，然后再次把两个有序小组合并为一个有序数组，最终合并为一个有序数组。
+
+归并排序的代码采用递归思想实现的。首先，最小下标值和最大下标值相加并除以2，得到中间下标值$mid$,用$MergeSort$对$low$到$mid$排序，然后用$MergeSort$对$mid+1$到$high$排序，当数组的前半部分和后半部分都排序好后，使用$Merge$函数。$Merge$函数的作用是合并两个有序数组。为了提高合并有序数组的效率，在$Merge$函数内定义了$B[N]$。首先，我们通过循环把数组$A$中从$low$到$high$的元素全部复制到$B$中,这时游标$i$(遍历的变量称为游标)从$low$开始，游标$j$从mid+1开始，谁最小就将谁先放入数组$A$,对其游标加$1$，并在每轮循环时对数组$A$的计数游标$k$加$1$
+
+eg.归并排序代码
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+#define N 7
+typedef int elemType;
+
+//合并两个有序数组
+void Merge(elemType A[],int low,int mid,int high){
+    static elemType B[N];//加static的目的是无论递归调用多少次，都只有一个B[N]
+    int i,j,k;
+    for (i=low;i<=high;i++){//把A[i]里面的每个元素给B[i]
+        B[i]=A[i];
+    }
+    k=low;
+    for (i=low,j=mid+1;i<=mid&&j<=high;k++){//合并两个有序数组
+        if(B[i]<B[j])
+            A[k]=B[i++];
+        else
+            A[k]=B[j++];
+    }
+    //把某一个有序数组的剩余元素放进来
+    while (i<=mid)//前一半的有剩余元素放入
+        A[k++]=B[i++];
+    while (j<=high)//后一半的有剩余元素放入
+        A[k++]=B[j++];
+}
+
+void MergeSort(elemType A[],int low,int high){//递归分割
+    if(low<high){
+        int mid=(low+high)/2;
+        MergeSort(A,low,mid);//排序好前一半
+        MergeSort(A,mid+1,high);//排序好后一半
+        Merge(A,low,mid,high);//将两个排序好的数组合并
+    }
+}
+
+void print(int* a){
+    for (int i = 0; i < N; ++i) {
+        printf("%3d",a[i]);
+    }
+    printf("\n");
+}
+
+//归并排序的空间复杂度是O[N]
+int main() {
+    int A[7]={49,38,65,97,76,13,27};
+    MergeSort(A,0,6);
+    print(A);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\CLionProjects\CPP\cmake-build-debug\CPP.exe
+ 13 27 38 49 65 76 97
+
+Process finished with exit code 0
+```
+
+$MergeSort$函数的递归次数是$\log_2n$,$Merge$函数的循环了$n$次，因此时间复杂度是$O(n\log_2n)$。
+
+归并排序最好，最坏，平均时间复杂度都是$O(n\log_2n)$。
+
+归并排序的空间复杂度是$O(n)$因为使用了数组$B$,它的大小与$A$一样，占用$n$个元素的空间
+
+## 7.8所有排序的时间复杂度与空间复杂度汇总
+
+![image-20250319155051378](C语言进阶-数据结构算法题实战.assets/image-20250319155051378.png)
+
+稳定性是指排序前后，相等的元素位置是否会交换
+
+复杂度是指代码编写的难度
