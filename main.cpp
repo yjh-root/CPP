@@ -2,47 +2,77 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string>
-#define N 10
 
-int setPartition(int a[],int n){
-    int pivotkey,low=0,low0=0,high=n-1,high0=n-1,flag=1,k=n/2,i;
-    int s1=0,s2=0;
-    while (flag){//当low等于k-1,也就是n/2-1时，分割结束
-        pivotkey=a[low];//选择枢轴
-        while (low<high){//基于枢轴对数据进行划分
-            while (low<high && a[high]>=pivotkey)
-                --high;
-            if(low !=high)
-                a[low]=a[high];
-            while (low<high && a[low]<=pivotkey)
-                ++low;
-            if(low != high)
-                a[high]=a[low];
-        }
-        a[low]=pivotkey;//把分割值放到对应位置
-        if(low==k-1)//如果枢轴是n/2 小元素，划分成功
-            flag=0;
-        else{//是否继续划分
-            if(low<k-1){
-                low0=++low;//low0只是做暂存，为下次使用准备，这里我们++low，low比分割值大1
-                high=high0;//把上次暂存的high0拿过来
-            } else{
-                low=low0;//把上次暂存的low0拿过来
-                high0=--high;//high0只是做暂存，为下次使用做准备
-            }
-        }
+typedef int ElemType;
+typedef struct {
+    ElemType *elem;
+    int TableLen;
+}SSTable;
+
+void STInit(SSTable &ST,int len){//申请空间，并进行随机数生成
+    ST.TableLen=len;
+    ST.elem=(ElemType*) malloc(sizeof (ElemType)*ST.TableLen);
+    int i;
+    srand(time(NULL));
+    for (i = 0; i < ST.TableLen; ++i) {
+        ST.elem[i]=rand();
     }
-    for ( i = 0; i < k; i++)
-        s1+=a[i];
-    for ( i = k; i < n; i++)
-        s2+=a[i];
-    return s2-s1;
 }
 
+void STPrint(SSTable ST){
+    for (int i = 0; i < 10; ++i) {
+        printf("%3d",ST.elem[i]);
+    }
+    printf("\n");
+}
+
+void swap(ElemType &a,ElemType &b){
+    ElemType tmp;
+    tmp=a;
+    a=b;
+    b=tmp;
+}
+
+//调整子树
+void AdjustDown(ElemType A[],int k,int len){
+    int dad=k;
+    int son=2*dad+1;//左孩子下标
+    while (son<=len){
+        if (son + 1 <= len && A[son] < A[son + 1])//看下有没有右孩子，比较左右孩子选大的
+            son++;
+        if (A[son] > A[dad])//比较孩子和父亲，如果孩子大于父亲，那么进行交换
+        {
+            swap(A[son], A[dad]);
+            dad = son;//孩子重新作为父亲，判断下一颗子树是否符合大根堆
+            son = 2 * dad + 1;
+        }
+        else
+            break;
+    }
+}
+
+void HeapSort(ElemType A[], int len)
+{
+    int i;
+    //先对前 10 个元素建立大根堆
+    for (i = len/2; i >= 0; i--)
+        AdjustDown(A, i, len);
+    //比较剩余的 A[10]到 A[99999]元素，小于堆顶，就放入 A[0],继续调整 10 个元素为大根堆
+    for (i = 10; i < 100000; i++)
+    {
+        if (A[i] < A[0])
+        {
+            A[0] = A[i];
+            AdjustDown(A, 0, 9);//继续调整为大根堆
+        }
+    }
+}
+
+
 int main() {
-    int A[N]={4,1,12,18,7,13,18,16,5,15};
-    int difference;
-    difference=setPartition(A,N);//考研初试只需要完成setPartition即可，无需编写这个main函数
-    printf("%d",difference);
+    SSTable ST;
+    STInit(ST,100000);//初始化
+    HeapSort(ST.elem,9);
+    STPrint(ST);
     return 0;
 }
