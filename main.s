@@ -1,10 +1,11 @@
 	.file	"main.cpp"
+	.intel_syntax noprefix
  # GNU C++14 (MinGW.org GCC-6.3.0-1) version 6.3.0 (mingw32)
  #	compiled by GNU C version 6.3.0, GMP version 6.1.2, MPFR version 3.1.5, MPC version 1.0.2, isl version 0.15
  # warning: MPC header version 1.0.2 differs from library version 1.0.3.
  # GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
  # options passed:  -iprefix c:\mingw\bin\../lib/gcc/mingw32/6.3.0/
- # main.cpp -mtune=generic -march=i586 -fverbose-asm
+ # main.cpp -m32 -masm=intel -mtune=generic -march=i586 -fverbose-asm
  # options enabled:  -faggressive-loop-optimizations
  # -fasynchronous-unwind-tables -fauto-inc-dec -fchkp-check-incomplete-type
  # -fchkp-check-read -fchkp-check-write -fchkp-instrument-calls
@@ -38,76 +39,70 @@
 	.section .rdata,"dr"
 __ZStL19piecewise_construct:
 	.space 1
-	.def	___main;	.scl	2;	.type	32;	.endef
-LC4:
-	.ascii "b=%f\12\0"
-LC5:
-	.ascii "d=%f\12\0"
-LC6:
-	.ascii "f=%f\12\0"
 	.text
-	.globl	_main
-	.def	_main;	.scl	2;	.type	32;	.endef
-_main:
+	.globl	__Z3addii
+	.def	__Z3addii;	.scl	2;	.type	32;	.endef
+__Z3addii:
 LFB936:
 	.cfi_startproc
-	pushl	%ebp	 #
+	push	ebp	 #
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp	 #,
+	mov	ebp, esp	 #,
 	.cfi_def_cfa_register 5
-	andl	$-16, %esp	 #,
-	subl	$64, %esp	 #,
-	call	___main	 #
-	flds	LC0	 #
-	fstps	60(%esp)	 # a
-	fldl	LC1	 #
-	fstpl	48(%esp)	 # c
-	flds	60(%esp)	 # a
-	flds	LC2	 #
-	faddp	%st, %st(1)	 #,
-	fstps	44(%esp)	 # b
-	fldl	48(%esp)	 # c
-	fldl	LC3	 #
-	faddp	%st, %st(1)	 #,
-	fstpl	32(%esp)	 # d
-	flds	60(%esp)	 # a
-	flds	LC2	 #
-	faddp	%st, %st(1)	 #,
-	fstpl	24(%esp)	 # f
-	flds	44(%esp)	 # b
-	fstpl	4(%esp)	 #
-	movl	$LC4, (%esp)	 #,
-	call	_printf	 #
-	fldl	32(%esp)	 # d
-	fstpl	4(%esp)	 #
-	movl	$LC5, (%esp)	 #,
-	call	_printf	 #
-	fldl	24(%esp)	 # f
-	fstpl	4(%esp)	 #
-	movl	$LC6, (%esp)	 #,
-	call	_printf	 #
-	movl	$0, %eax	 #, _12
+	sub	esp, 16	 #,
+	mov	edx, DWORD PTR [ebp+8]	 # tmp93, a
+	mov	eax, DWORD PTR [ebp+12]	 # tmp94, b
+	add	eax, edx	 # tmp92, tmp93
+	mov	DWORD PTR [ebp-4], eax	 # ret, tmp92
+	mov	eax, DWORD PTR [ebp-4]	 # _4, ret
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
 LFE936:
+	.def	___main;	.scl	2;	.type	32;	.endef
 	.section .rdata,"dr"
-	.align 4
 LC0:
-	.long	1345844999
-	.align 8
-LC1:
-	.long	-509607936
-	.long	1107754720
-	.align 4
-LC2:
-	.long	1101004800
-	.align 8
-LC3:
-	.long	0
-	.long	1077149696
+	.ascii "add result=%d\12\0"
+	.text
+	.globl	_main
+	.def	_main;	.scl	2;	.type	32;	.endef
+_main:
+LFB937:
+	.cfi_startproc
+	push	ebp	 #
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp	 #,
+	.cfi_def_cfa_register 5
+	and	esp, -16	 #,
+	sub	esp, 32	 #,
+	call	___main	 #
+	mov	DWORD PTR [esp+16], 5	 # a,
+	lea	eax, [esp+16]	 # tmp91,
+	mov	DWORD PTR [esp+28], eax	 # p, tmp91
+	mov	eax, DWORD PTR [esp+28]	 # tmp92, p
+	mov	eax, DWORD PTR [eax]	 # _4, *p_3
+	add	eax, 2	 # tmp93,
+	mov	DWORD PTR [esp+24], eax	 # b, tmp93
+	mov	eax, DWORD PTR [esp+16]	 # a.0_6, a
+	mov	edx, DWORD PTR [esp+24]	 # tmp94, b
+	mov	DWORD PTR [esp+4], edx	 #, tmp94
+	mov	DWORD PTR [esp], eax	 #, a.0_6
+	call	__Z3addii	 #
+	mov	DWORD PTR [esp+20], eax	 # ret, tmp95
+	mov	eax, DWORD PTR [esp+20]	 # tmp96, ret
+	mov	DWORD PTR [esp+4], eax	 #, tmp96
+	mov	DWORD PTR [esp], OFFSET FLAT:LC0	 #,
+	call	_printf	 #
+	mov	eax, 0	 # _10,
+	leave
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+LFE937:
 	.ident	"GCC: (MinGW.org GCC-6.3.0-1) 6.3.0"
 	.def	_printf;	.scl	2;	.type	32;	.endef

@@ -1013,3 +1013,344 @@ $OF$:溢出标志。最近带符号数运算的结果是否溢出，若溢出，
 
 <font color="red">Jcondition条件转移指令，就是根据条件码ZF和SF来实现跳转</font>
 
+## 3.4各种变量赋值
+
+eg.
+
+```
+#include <stdio.h>
+int main() {
+    int arr[3]={1,3,3};
+    int *p;
+    int i=5;
+    int j=10;
+    i=arr[2];
+    p=arr;
+    printf("i=%d\n",i);
+    return 0;
+}
+```
+
+控制台键入gcc -m32 -masm=intel -S -fverbose-asm main.cpp命令生成汇编文件
+
+ie.
+
+```
+.text
+.def ___main; .scl 2; .type 32; .endef
+.section .rdata,"dr" 
+LC0:
+.ascii "i=%d\12\0"
+.text
+.globl _main
+.def _main; .scl 2; .type 32; .endef
+_main:
+push ebp #
+mov ebp, esp #, 
+and esp, -16 #, 
+sub esp, 48 #, 
+# main.c:3: int main() {
+call ___main # #从 main 到这里这一段我们函数调用时解析，暂时不管
+# main.c:4: int arr[3] = {1, 2, 3};
+mov DWORD PTR [esp+24], 1 # arr,#把常量 1 放入栈指针(esp 寄存器存的栈指针)偏移 24个字节的
+mov DWORD PTR [esp+28], 2 # arr, 
+mov DWORD PTR [esp+32], 3 # arr, 
+# main.c:6: int i = 5;
+mov DWORD PTR [esp+44], 5 # i,#把常量 5 放入栈指针(esp 寄存器存的栈指针)偏移 44 个字节的位置，这个位置是变量 i 的空间
+# main.c:7: int j = 10;
+mov DWORD PTR [esp+40], 10 # j,#把常量 10 放入栈指针(esp 寄存器存的栈指针)偏移 40个字节的位置，这个位置是变量 j 的空间
+# main.c:8: i = arr[2];
+mov eax, DWORD PTR [esp+32] # tmp89, arr#把栈指针(esp 寄存器存的栈指针)偏移 32 个字节的位置拿到的数据，放到寄存器 eax 中
+mov DWORD PTR [esp+44], eax # i, tmp89#把 eax 寄存器的内容放入栈指针(esp 寄存器存的栈指针)偏移 44 个字节的位置
+# main.c:9: p = arr;
+lea eax, [esp+24] # tmp90,#lea 和 mov 不一样，是拿栈指针偏移 24 个字节的位置的地址，把地址放到 eax 寄存器
+mov DWORD PTR [esp+36], eax # p, tmp90 #把 eax 寄存器的内容放入栈指针(esp 寄存器存的栈指针)偏移 36 个字节的位置，在这里你可以看到
+# main.c:10: printf("i=%d\n", i);
+mov eax, DWORD PTR [esp+44] # tmp91, i#把栈指针，偏移 44 个字节的位置拿到的数据，放到寄存器 eax 中
+mov DWORD PTR [esp+4], eax #, tmp91 #把 eax 数据放到栈指针偏移 4 个字节位置的内存中
+mov DWORD PTR [esp], OFFSET FLAT:LC0 #,#把 LC0(也就是上面那个字符串）的地址，放到寄存器栈指针指向的内存位置
+call _printf # #调用 printf 函数
+# main.c:11: return 0;#下面的内容暂时不管
+mov eax, 0 # _10, 
+# main.c:12: }
+leave
+ret
+.ident "GCC: (x86_64-posix-sjlj-rev0, Built by MinGW-W64 project) 8.1.0"
+.def _printf; .scl 2; .type 32; .endef
+```
+
+我们从 main 标签位置开看即可。我们的 C 代码在让 CPU 去运行时，其实所有的变量名都已经消失了，实际是数据从一个空间，拿到另一个空间的过程。
+
+我们访问所有变量的空间都是通过栈指针（$esp$ 时刻都存着栈指针，也可以称为栈顶指针）的偏移，来获取对应变量内存空间的数据的。
+
+$ptr -- pointer$ (既指针)得缩写。汇编里面 $ptr$ 是规定的字(既保留字),是用来临时指定类型的。(可以理解为，$ptr$是临时的类型转换，相当于$C$语言中的强制类型转换)如mov ax,bx; 是把$BX$寄存器""里"的值赋予$AX$，由于二者都是寄存器，长度已定($word$型)，所以没有必要加$WORD$
+mov ax,word ptr [bx];是把内存地址等于“$BX$寄存器的值”的地方所存放的数据，赋予$ax$。由于只是给出一个内存地址，不知道希望赋予$ax$的，是$byte$还是$word$，所以可以用$word$明确指出；如果不用，既(mov ax, [bx];)则在8086中是默认传递一个字，既两个字节给$ax$。
+intel 中的$dword$ $ptr$长字(四字节),$word$ $ptr$是双字$byte$ $ptr$是一字节
+
+## 3.5选择循环
+
+eg.
+
+```
+#include <stdio.h>
+
+int main() {
+    int i=5;
+    int j=10;
+    if(i<j)
+        printf("i is small\n");
+    for (i = 0; i < 5; ++i) {
+        printf("this is loop\n");
+    }
+    return 0;
+}
+```
+
+控制台键入gcc -m32 -masm=intel -S -fverbose-asm main.cpp命令生成汇编文件
+
+ie.
+
+```
+.text#这里是文字常量区，放了我们的字符串常量，.LC0 和.LC1 分别是我们要用到的两
+个字符串常量的起始地址
+.def ___main; .scl 2; .type 32; .endef
+.section .rdata,"dr" 
+LC0:
+.ascii "i is small\0" 
+LC1:
+.ascii "this is loop\0"
+text
+.globl _main
+.def _main; .scl 2; .type 32; .endef
+_main:
+push ebp #
+mov ebp, esp #, 
+and esp, -16 #, 
+sub esp, 32 #, 
+# main.c:4: {
+call ___main ##从 main 到这里这一段我们函数调用时解析，暂时不管
+# main.c:5: int i=5;
+mov DWORD PTR [esp+28], 5 # i,#把常量 5 放入栈指针(esp 寄存器存的栈指针)偏移 28 个字节的位置，这个位置是变量 i 的空间
+# main.c:6: int j=10;
+mov DWORD PTR [esp+24], 10 # j,#把常量 10 放入栈指针(esp 寄存器存的栈指针)偏移 24 个字节的位置，这个位置是变量 j 的空间
+# main.c:7: if (i < j)
+mov eax, DWORD PTR [esp+28] # tmp89, i#把栈指针(esp 寄存器存的栈指针)偏移28 个字节的位置内的值，放入 eax 寄存器
+cmp eax, DWORD PTR [esp+24] # tmp89, j#比较 eax 寄存器内的值和栈指针偏移 24个字节位置的值的大小，拿 eax 寄存器值减去 DWORD PTR [esp+24]，然后设置条件码
+jge L2 #, #如果 eax 寄存器大于等于 DWORD PTR [esp+24]，那么跳转到 L2,否则直接往下执行，jge 是根据条件码 ZF 和 SF 来判断的
+# main.c:9: printf("i is small\n");
+mov DWORD PTR [esp], OFFSET FLAT:LC0 #,#把 LC0(也就是上面那个字符串）的地址，放到寄存器栈指针指向的内存位置
+call _puts #
+L2:
+# main.c:11: for(i=0;i<5;i++)
+mov DWORD PTR [esp+28], 0 # i,#把常量 0 放入栈指针(esp 寄存器存的栈指针)偏移 28 个字节的位置，这个位置是变量 i 的空间
+# main.c:11: for(i=0;i<5;i++)
+jmp L3 # #无条件跳转到 L3
+L4:
+# main.c:13: printf("this is loop\n");
+mov DWORD PTR [esp], OFFSET FLAT:LC1 #,#把 LC1(也就是上面那个字符串）的地址，放到寄存器栈指针指向的内存位置
+call _puts #
+# main.c:11: for(i=0;i<5;i++)
+add DWORD PTR [esp+28], 1 # i, 
+L3:
+# main.c:11: for(i=0;i<5;i++)
+cmp DWORD PTR [esp+28], 4 # i,#比较栈指针偏移 24个字节位置的值与 4 的大小，拿 DWORD PTR [esp+24]减去 4，然后设置条件码jle L4 #, #小于等于就跳转到 L4
+# main.c:15: return 0;
+mov eax, 0 # _11, 
+# main.c:16: }
+leave
+ret
+.ident "GCC: (x86_64-posix-sjlj-rev0, Built by MinGW-W64 project) 8.1.0"
+.def _puts; .scl 2; .type 32; .endef
+```
+
+主要掌握的指令是 $cmp,jge,jmp,jle$等。以及了解一下字符串常量是存在文字常量区。
+
+## 3.6函数调用
+
+eg.
+
+```
+#include <stdio.h>
+
+int add(int a,int b){
+    int ret;
+    ret=a+b;
+    return ret;
+}
+int main() {
+    int a,b,ret;
+    int *p;
+    a=5;
+    p=&a;
+    b=*p+2;
+    ret= add(a,b);
+    printf("add result=%d\n",ret);
+    return 0;
+}
+```
+
+控制台键入gcc -m32 -masm=intel -S -fverbose-asm main.cpp命令生成汇编文件
+
+ie.
+
+```
+.text
+.globl _add
+.def _add; .scl 2; .type 32; .endef _
+add:#add 函数的入口，这里阅读需要结合咱们的函数调用图（图 3）
+push ebp # #把原有函数，也就是 main 函数的栈基指针压栈，压栈是把 ebp 的值保存到内存上，位置就是 esp 指向的位置
+mov ebp, esp #, ##把 main 的栈顶指针 esp，作为 add 函数的栈基指针 ebp
+sub esp, 16 #, #由于 add 函数自身要使用栈空间，把 esp 减去 16，是指 add 函数的函数栈空间大小是 16 个字节
+# main.c:5: ret = a + b;
+mov edx, DWORD PTR [ebp+8] # tmp93, a #拿到实参，也就是 a 的值，放入edx
+mov eax, DWORD PTR [ebp+12] # tmp94, b#拿到实参，也就是 b 的值，放入 eax
+add eax, edx # tmp92, tmp93 #将 eax 和 edx 相加
+mov DWORD PTR [ebp-4], eax # ret, tmp92 #把 eax，也就是 ret 的值，放入 ebp减 4 个字节位置
+# main.c:6: return ret;
+mov eax, DWORD PTR [ebp-4] # _4, ret
+# main.c:7: }
+leave
+ret #函数返回,弹出压栈的指令返回地址，回到 main 函数执行
+.def ___main; .scl 2; .type 32; .endef
+.section .rdata,"dr" 
+LC0:
+.ascii "add result=%d\12\0"
+.text
+.globl _main
+.def _main; .scl 2; .type 32; .endef
+_main:
+push ebp #
+mov ebp, esp #, 
+and esp, -16 #, 
+sub esp, 32 #, 
+# main.c:9: int main() {
+call ___main #从 main 到这里这一段我们函数调用时原理，与 add 一致
+# main.c:12: a = 5;
+mov DWORD PTR [esp+16], 5 # a,#把常量 5 放入栈指针(esp 寄存器存的栈指针)偏移 16 个字节的位置，这个位置是变量 a 的空间
+# main.c:13: p = &a;
+lea eax, [esp+16] # tmp91, #这里用的 lea，和 mov 不一样，是将 esp+16 位置的地址，放到 eax 寄存器中
+mov DWORD PTR [esp+28], eax # p, tmp91 #把 eax 中的值放到栈指针偏移 28 字节位置，也就是指针变量 p 中
+# main.c:14: b = *p + 2; #下面两个 mov 是间接访问的经典解析
+mov eax, DWORD PTR [esp+28] # tmp92, p #栈指针偏移 28 字节位置，也就是指针变量 p 的值，放到 eax 寄存器
+mov eax, DWORD PTR [eax] # _1, *p_5#把 eax 寄存器中的值作为地址，去内存访问到对应的数据，放入 eax 中
+# main.c:14: b = *p + 2;
+add eax, 2 # tmp93,#对 eax 中的值加 2，结果还是在 eax 中
+mov DWORD PTR [esp+24], eax # b, tmp93#把 eax 中的值放到栈指针偏移 24 字节位置，也就是变量 b 中
+# main.c:15: ret = add(a, b);#下面是函数调用，实参传递的经典动作，从而理解值传递是什么实现的
+mov eax, DWORD PTR [esp+16] # a.0_2, a#栈指针偏移 16 字节位置，也就是变量 a的值，放到 eax 寄存器
+mov edx, DWORD PTR [esp+24] # tmp94, b#栈指针偏移 24 字节位置，也就是变量b 的值，放到 edx 寄存器
+mov DWORD PTR [esp+4], edx #, tmp94#把 edx 中的值（变量 b），放到寄存器栈指针偏移 4 自己的内存位置
+mov DWORD PTR [esp], eax #, a.0_2#把 eax 中的值（变量 a），放到寄存器栈指针指向的内存位置
+call _add # #调用 add 函数
+mov DWORD PTR [esp+20], eax # ret, tmp95
+# main.c:16: printf("add result=%d\n", ret);
+mov eax, DWORD PTR [esp+20] # tmp96, ret
+mov DWORD PTR [esp+4], eax #, tmp96
+mov DWORD PTR [esp], OFFSET FLAT:LC0 #, 
+call _printf #
+# main.c:17: return 0;
+mov eax, 0 # _10, 
+# main.c:18: }
+leave
+ret
+.ident "GCC: (x86_64-posix-sjlj-rev0, Built by MinGW-W64 project) 8.1.0"
+.def _printf; .scl 2; .type 32; .endef
+```
+
+<font color="red">函数栈是向下生长的。所谓向下生长，是指从内存高地址想低地址的路径延伸</font>。于是，栈就有栈底和栈顶，栈顶的地址要比栈底低。
+
+对$x86$体系的$CPU$而言，寄存器$ebp$可称为帧指针或基址指针($base\quad pointer$),寄存器$esp$可称为栈指针($base\quad pointer$)。
+
+(1)$ebp$在未改变之前始终指向栈帧的开始(也就是栈底)，所以$ebp$的用途是在堆栈中寻址(寻址的作用会在下面详细介绍)。
+
+(2)$esp$会随着数据的入栈和出栈而移动，即$esp$始终指向栈顶。
+如下图所示，假设函数$A$调用函数$B$，称函数$A$为调用者，称函数$B$为被调用者，则函数调用过程可以描述如下：
+(1)首先将调用者($A$)的堆栈的基址$(ebp)$入栈，以保存之前任务的信息。
+(2)然后将调用者$(A)$的栈顶指针$(esp)$的值赋给$ebp$，作为新的基址(即被调用者$B$的栈底)。原有函数的栈顶，是新函数的栈底。
+(3)再后在这个基址(被调用者$B$的栈底)上开辟(一般用$sub$指令)相应的空间用作被调用者$B$的栈空间。
+(4)函数$B$返回后，当前栈帧的$ebp$恢复为调用者$A$的栈顶$(esp)$，使栈顶恢复函数$B$被调用前的位置；然后调用者$A$从恢复后的栈顶弹出之前的$ebp$值(因为这个值在函数调用前一步被压入堆栈)。
+
+![441654e2-0b89-4907-f2b1-44d35b712bee](C语言高级-C语言补充、组成原理数据表示与汇编实战、操作系统文件实战.assets/441654e2-0b89-4907-f2b1-44d35b712bee.png)
+
+这样，$ebp$和$esp$就都恢复了调用函数$B$前的位置，即栈恢复函数$B$调用前的状态。相当于($ret$指令做了什么)
+
+```
+mov esp,ebp //把 ebp 内的内容复制到 esp 寄存器中，也就是 B 函数的栈基作为原有调用者 A 函数的栈顶
+pop ebp //弹出栈顶元素，放到 ebp 寄存器中，因为原有 A 函数的栈基指针压到了内存里，所以弹出后，放入 ebp,这样原函数 A 的现场恢复完毕
+```
+
+<font color="red">这一节主要掌握的指令是 add,sub,call,ret 等。</font>
+
+下面还需要掌握函数调用时，机器码的偏移值，我们前面转的都只有汇编，没有含有机器码，如何得到机器码，需要执行下面两条指令。
+
+第一条 gcc -m32 -g -o main main.c （Mac 一致）
+
+第二条 objdump --source main.exe >main.dump(Mac 去掉.exe 后缀，写为 main 即可）
+
+只需要掌握下面代码中的 e8 ab ff ff ff call 401510 <_add>中的 e8 ab ff ff ff 是什么含义即可，e8 代表 call，而 ab ff ff ff 是通过 00401460 减去 4014b5 所得
+
+```
+00401460 <__Z3addii>:
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+
+int add(int a,int b){
+  401460:	55                   	push   %ebp
+  401461:	89 e5                	mov    %esp,%ebp
+  401463:	83 ec 10             	sub    $0x10,%esp
+    int ret;
+    ret=a+b;
+  401466:	8b 55 08             	mov    0x8(%ebp),%edx
+  401469:	8b 45 0c             	mov    0xc(%ebp),%eax
+  40146c:	01 d0                	add    %edx,%eax
+  40146e:	89 45 fc             	mov    %eax,-0x4(%ebp)
+    return ret;
+  401471:	8b 45 fc             	mov    -0x4(%ebp),%eax
+}
+  401474:	c9                   	leave  
+  401475:	c3                   	ret
+int main() {
+  401476:	55                   	push   %ebp
+  401477:	89 e5                	mov    %esp,%ebp
+  401479:	83 e4 f0             	and    $0xfffffff0,%esp
+  40147c:	83 ec 20             	sub    $0x20,%esp
+  40147f:	e8 8c 05 00 00       	call   401a10 <___main>
+    int a,b,ret;
+    int *p;
+    a=5;
+  401484:	c7 44 24 10 05 00 00 	movl   $0x5,0x10(%esp)
+  40148b:	00 
+    p=&a;
+  40148c:	8d 44 24 10          	lea    0x10(%esp),%eax
+  401490:	89 44 24 1c          	mov    %eax,0x1c(%esp)
+    b=*p+2;
+  401494:	8b 44 24 1c          	mov    0x1c(%esp),%eax
+  401498:	8b 00                	mov    (%eax),%eax
+  40149a:	83 c0 02             	add    $0x2,%eax
+  40149d:	89 44 24 18          	mov    %eax,0x18(%esp)
+    ret= add(a,b);
+  4014a1:	8b 44 24 10          	mov    0x10(%esp),%eax
+  4014a5:	8b 54 24 18          	mov    0x18(%esp),%edx
+  4014a9:	89 54 24 04          	mov    %edx,0x4(%esp)
+  4014ad:	89 04 24             	mov    %eax,(%esp)
+  4014b0:	e8 ab ff ff ff       	call   401460 <__Z3addii>
+  4014b5:	89 44 24 14          	mov    %eax,0x14(%esp)
+    printf("add result=%d\n",ret);
+  4014b9:	8b 44 24 14          	mov    0x14(%esp),%eax
+  4014bd:	89 44 24 04          	mov    %eax,0x4(%esp)
+  4014c1:	c7 04 24 65 50 40 00 	movl   $0x405065,(%esp)
+  4014c8:	e8 e3 25 00 00       	call   403ab0 <_printf>
+    return 0;
+  4014cd:	b8 00 00 00 00       	mov    $0x0,%eax
+  4014d2:	c9                   	leave  
+  4014d3:	c3                   	ret    
+  4014d4:	66 90                	xchg   %ax,%ax
+  4014d6:	66 90                	xchg   %ax,%ax
+  4014d8:	66 90                	xchg   %ax,%ax
+  4014da:	66 90                	xchg   %ax,%ax
+  4014dc:	66 90                	xchg   %ax,%ax
+  4014de:	66 90                	xchg   %ax,%ax
+```
+
