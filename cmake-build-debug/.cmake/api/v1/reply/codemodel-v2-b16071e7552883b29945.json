@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "D:/CLionProjects/CPP/cmake-build-debug",
-		"source" : "D:/CLionProjects/CPP"
+		"build" : "D:/WorkSapse/CPP/cmake-build-debug",
+		"source" : "D:/WorkSapse/CPP"
 	},
 	"version" : 
 	{

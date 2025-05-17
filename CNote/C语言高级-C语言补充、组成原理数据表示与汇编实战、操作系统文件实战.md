@@ -1354,3 +1354,378 @@ int main() {
   4014de:	66 90                	xchg   %ax,%ax
 ```
 
+# 4、文件操作
+
+## 4.1文件操作原理
+
+程序执行时就称为进程，进程运行过程的数据均在内存中。需要存储运算后的数据时，就需要使用文件。这样程序下次启动后，就可以直接从文件中读取数据。(不像我们之前的程序，每次运行都需要手动输入数据)。
+
+文件是指存储在外部介质(如磁盘，磁带)上的数据集合。操作系统(Windows,Linux,Mac等)，是以文件为单位对数据进行管理的。
+
+![image-20250516135732592](assets/image-20250516135732592.png)
+
+C语言对文件的处理方法如下:
+
+**缓冲文件系统**:系统自动地在内存区为每个正在使用的文件开辟一个缓冲区。用缓冲文件系统进行的输入/输出称为高级磁盘输入/输出。
+
+**非缓冲文件系统**:系统不自动开辟确定大小的缓冲区，而由程序为每个文件设定缓冲区。用非缓冲文件系统进行的输入/输出称为低级输入/输出。
+
+缓冲区其实就是一段**内存空间**，分为读缓冲，写缓冲。C语言缓冲的三个特性如下:
+
+(1)**全缓冲**:在这种情况下，当填满标准I/O缓存后才进行实际I/O操作。全缓冲的典型代表是对磁盘文件的读写操作。
+
+(2)**行缓冲**:在这种情况下，当在输入和输出中遇到换行符时，将执行真正的I/O操作。这时，我们输入的字符先存放到缓冲区中，等按下回车键换行时才进行实际的I/O操作。典型代表是标准输入缓冲区(stdin)和标准输出缓冲区(stdout)。
+
+(3)**不带缓冲**:也就是不进行缓冲，标准出错情况(stderr)是典型代表，这就使得出错信息可以直接尽快显示出来。
+
+### 4.1.1文件指针
+
+打开一个文件后，我们会得到一个$FILE*$类型的文件指针$fp$,然后通过该文件指针对文件进行操作。$FILE*$是一个结构体指针，其具体内容如下所示:
+
+```
+struct _iobuf {
+    char *_ptr; //下一个要被读取的字符地址
+    int _cnt; //剩余的字符，若是输入缓冲区，则表示缓冲区中还有多少个字符未被读取
+    char *_base; //缓冲区基地址
+    int _flag; //读写状态标志位
+    int _file; //文件描述符
+    int _charbuf;
+    int _bufsiz; //缓冲区大小
+    char *_tmpfname;
+  };
+  typedef struct _iobuf FILE;
+```
+
+$fp$是一个指向$FILE$类型结构体的指针变量。可以使$fp$指向某个文件的结构体变量，从而通过该结构体变量中的文件信息来访问该文件。
+
+## 4.2文件打开及关闭
+
+**fopen函数**:用于打开由fname(文件名)指定的文件，并返回一个关联该文件的流。如果发生错误，那么fopen返回NULL。mode(方式)用于决定文件的用途(如输入，输出等)，具体形式如下所示:
+
+```
+	FILE *fopen(const char *name,const char *mode);
+```
+
+常用的 mode 参数及其各自的意义如下所示。
+
+| mode（方式） |                        意义                        |
+| :----------: | :------------------------------------------------: |
+|   **"r"**    |           **打开一个用于读取的文本文件**           |
+|   **"w"**    | **创建一个用于写入的文本文件，如果存在会清空文件** |
+|     "a"      |      附加到一个文本文件,文件存在不会清空文件       |
+|   **"rb"**   |          **打开一个用于读取的二进制文件**          |
+|   **"wb"**   |          **创建一个用于写入的二进制文件**          |
+|     "ab"     |            创建一个用于写入的二进制文件            |
+|   **"r+"**   |          **打开一个用于读/写的文本文件**           |
+|   **"w+"**   |          **创建一个用于读/写的文本文件**           |
+|     "a+"     |            打开一个用于读/写的文本文件             |
+|  **"rb+"**   |         **打开一个用于读/写的二进制文件**          |
+|  **"wb+"**   |         **创建一个用于读/写的二进制文件**          |
+|    "ab+"     |           打开一个用于读/写的二进制文件            |
+
+用文本模式写入的文件只能用文本模式读取，用二进制模式写入的文件只能用二进制文件读取。
+
+文本模式只能写入字符串，二进制模式可以写入整型数，浮点数和结构体。
+
+eg.
+
+```
+#include <stdio.h>
+
+//文件操作
+int main() {
+    FILE *fp;//定义一个FILE类型的指针变量
+    fp= fopen("../Files/file.txt","r");//使用相对路径打开文件
+    if(NULL==fp){//判断文件是否打开失败
+        perror("fopen");//定位失败原因
+        return -1;
+    }
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\WorkSapse\CPP\cmake-build-debug\CPP.exe
+
+Process finished with exit code 0
+```
+
+**fget函数**:用于从指定的文件中读入一个字符，该文件必须是以读或读写方式打开的。如果读取一个字符成功，那么赋给ch。如果遇到文件结束符，那么返回文件结束标志EOF(-1)。具体形式如下所示:
+
+```
+	int fgetc(FILE * stream);
+```
+
+eg.
+
+```
+#include <stdio.h>
+
+//文件操作
+int main() {
+    FILE *fp;//定义一个FILE类型的指针变量
+    fp= fopen("../Files/file.txt","r");//使用相对路径打开文件
+    if(NULL==fp){//判断文件是否打开失败
+        perror("fopen");//定位失败原因
+        return -1;
+    }
+    char c;
+    while ((c= fgetc(fp))!=EOF)//读取文件内的所有内容
+        printf("%c",c);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\WorkSapse\CPP\cmake-build-debug\CPP.exe
+fuck you
+Process finished with exit code 0
+```
+
+**fputc函数**:用于将字符串ch的值输出到fp指向的文件中，如果输出成功，那么返回输出的字符，如果输出失败，那么返回EOF(-1)。具体形式如下所示:
+
+```
+	int fputc(int ch, FILE *stream);
+```
+
+**fclose函数**:用于关闭给出的文件流，并释放已关联到流的所有缓冲区。fclose执行成功时返回0，否则返回EOF(-1)。具体形式如下所示:
+
+```
+	int fclose(FILE *stream);
+```
+
+eg.
+
+```
+#include <stdio.h>
+
+//文件操作
+int main() {
+    FILE *fp;//定义一个FILE类型的指针变量
+    fp= fopen("../Files/file.txt","r+");//使用相对路径打开文件
+    if(NULL==fp){//判断文件是否打开失败
+        perror("fopen");//定位失败原因
+        return -1;
+    }
+    char c;
+    while ((c= fgetc(fp))!=EOF)//读取文件内的所有内容
+        printf("%c",c);
+    c= fputc('H',fp);
+    if(-1==c){
+        perror("fputc");
+        return -1;
+    }
+    fclose(fp);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\WorkSapse\CPP\cmake-build-debug\CPP.exe
+fuck you
+Process finished with exit code 0
+
+```
+
+![image-20250516164412534](assets/image-20250516164412534.png)
+
+## 4.3文件读写
+
+### 4.3.1 fread函数与fwrite函数
+
+fread函数与fwrite函数的具体形式如下所示:
+
+```
+	int fread(void *buffer,size_t size,size_t num, FILE *stream);
+	int fwrite(void *buffer,size_t size,size_t count, FILE *stream);
+```
+
+其中buffer是一个指针，对fread来说它是读入数据的存放地址，对fwrite来说它是输出数据的地址(均指起始地址)；size是要读写的单个成员字节数；num和count是要进行读写多少size字节的数据项；fp是文件型指针；fread函数的返回值是读取的内容数量，fwrite写成功后返回值是已写对象的数量。
+
+eg.write
+
+```
+#include <stdio.h>
+#include <string.h>
+
+//文件操作
+int main() {
+    char buf[20]="hello\nworld";
+    int ret;//存储函数的返回值
+    FILE *fp;//定义一个FILE类型的指针变量
+    fp= fopen("../Files/file.txt","r+");//使用相对路径打开文件
+    if(NULL==fp){//判断文件是否打开失败
+        perror("fopen");//定位失败原因
+        return -1;
+    }
+    ret= fwrite(buf,sizeof(char), strlen(buf),fp);//把buf中的字符串写入文件
+    fclose(fp);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\WorkSapse\CPP\cmake-build-debug\CPP.exe
+
+Process finished with exit code 0
+```
+
+![image-20250516170857141](assets/image-20250516170857141.png)
+
+eg.fread
+
+```
+#include <stdio.h>
+#include <string.h>
+
+//文件操作
+int main() {
+    char buf[20]="hello\nworld";
+    int ret;//存储函数的返回值
+    FILE *fp;//定义一个FILE类型的指针变量
+    fp= fopen("../Files/file.txt","r+");//使用相对路径打开文件
+    if(NULL==fp){//判断文件是否打开失败
+        perror("fopen");//定位失败原因
+        return -1;
+    }
+//    ret= fwrite(buf,sizeof(char), strlen(buf),fp);//把buf中的字符串写入文件
+    char buf1[20]={0};
+    ret =fread(buf1,sizeof(char), strlen(buf),fp);
+    puts(buf1);
+    fclose(fp);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\WorkSapse\CPP\cmake-build-debug\CPP.exe
+hello
+world
+Process finished with exit code 0
+```
+
+eg.二进制模式下读写
+
+```
+#include <stdio.h>
+#include <string.h>
+
+//文件操作
+int main() {
+    int i=123456;
+    int ret;//存储函数的返回值
+    FILE *fp;//定义一个FILE类型的指针变量
+    fp= fopen("../Files/file.txt","rb+");//使用相对路径打开文件
+    if(NULL==fp){//判断文件是否打开失败
+        perror("fop en");//定位失败原因
+        return -1;
+    }
+    ret= fwrite(&i,sizeof(int), 1,fp);//把buf中的字符串写入文件
+    i=0;
+    fread(&i,sizeof(int ), 1,fp);
+    printf("i=%d",i);
+    fclose(fp);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\WorkSapse\CPP\cmake-build-debug\CPP.exe
+i=123456
+Process finished with exit code 0
+```
+
+![image-20250516173207661](assets/image-20250516173207661.png)
+
+## 4.4文件位置指针偏移
+
+### 4.4.1 fseek函数
+
+**fseek函数**:fseek函数的功能是改变文件的位置指针，其具体调用形式如下:
+
+```
+	int fseek(FILE *stream, long offset,int origin);
+```
+
+其中fseek的说明如下：
+
+```
+	fseek(文件类型指针,位移量,起始点)
+```
+
+起始点的说明如下:
+
+|   文件开头   | SEEK_SET |  0   |
+| :----------: | :------: | :--: |
+| 文件当前位置 | SEEK_CUR |  1   |
+|   文件末尾   | SEEK_END |  2   |
+
+位移量是指以起始点为基点，向前移动的字节数，一般要求为long型。
+
+fseek函数调用成功时返回零，调用失败时返回非零。
+
+### 4.4.2 ftell函数
+
+ftell函数返回stream(流)当前的文件位置，发生错误时返回-1。当我们想知道位置指针距离文件开头的位置时，就需要用到ftell函数，其具体形式如下所示:
+
+```
+	long ftell(FILE *satream);
+```
+
+eg.
+
+```
+#include <stdio.h>
+#include <string.h>
+
+//文件操作
+int main() {
+    char str[20]="hello\nworld";
+    int len=0;//用于保存字符串长度
+    long pos;
+    int ret;//存储函数的返回值
+    FILE *fp;//定义一个FILE类型的指针变量
+    fp= fopen("../Files/file.txt","r+");//使用相对路径打开文件
+    if(NULL==fp){//判断文件是否打开失败
+        perror("fopen");//定位失败原因
+        return -1;
+    }
+    len= strlen(str);
+    fwrite(str,sizeof(char),len,fp);
+    ret= fseek(fp,-5,SEEK_CUR);
+    if(ret!=0){
+        perror("fseek");
+        fclose(fp);
+        return -1;
+    }
+    pos= ftell(fp);
+    printf("now pos=%ld\n",pos);
+    memset(str,0,sizeof(str));//清空str
+    fread(str,sizeof(char),sizeof(str),fp);
+    printf("str=%s\n",str);
+    return 0;
+}
+```
+
+ie.
+
+```
+D:\WorkSapse\CPP\cmake-build-debug\CPP.exe
+now pos=7
+str=world
+
+Process finished with exit code 0
+```
+

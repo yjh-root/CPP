@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="CPP"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="D:/WorkSapse/CPP/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="CPP">
+				<Option output="D:/WorkSapse/CPP/cmake-build-debug/CPP.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/WorkSapse/CPP/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/x86_64-w64-mingw32"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/backward"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/../../../../include"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include-fixed"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/../../../../x86_64-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 CPP"/>
+					<CompileFile command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="CPP/fast">
+				<Option output="D:/WorkSapse/CPP/cmake-build-debug/CPP.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/WorkSapse/CPP/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/x86_64-w64-mingw32"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/backward"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/../../../../include"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/include-fixed"/>
+					<Add directory="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/../lib/gcc/x86_64-w64-mingw32/13.1.0/../../../../x86_64-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 CPP/fast"/>
+					<CompileFile command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="D:/WorkSapse/CPP/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="D:/WorkSapse/CPP/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="D:/JetBrains/CLion 2023.3.4/bin/mingw/bin/mingw32-make.exe -f &quot;D:/WorkSapse/CPP/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="D:/WorkSapse/CPP/main.cpp">
+			<Option target="CPP"/>
+		</Unit>
+		<Unit filename="D:/WorkSapse/CPP/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
