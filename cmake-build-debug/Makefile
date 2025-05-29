@@ -128,6 +128,30 @@ CPP/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\CPP.dir\build.make CMakeFiles/CPP.dir/build
 .PHONY : CPP/fast
 
+SqList.obj: SqList.cpp.obj
+.PHONY : SqList.obj
+
+# target to build an object file
+SqList.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CPP.dir\build.make CMakeFiles/CPP.dir/SqList.cpp.obj
+.PHONY : SqList.cpp.obj
+
+SqList.i: SqList.cpp.i
+.PHONY : SqList.i
+
+# target to preprocess a source file
+SqList.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CPP.dir\build.make CMakeFiles/CPP.dir/SqList.cpp.i
+.PHONY : SqList.cpp.i
+
+SqList.s: SqList.cpp.s
+.PHONY : SqList.s
+
+# target to generate assembly for a file
+SqList.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\CPP.dir\build.make CMakeFiles/CPP.dir/SqList.cpp.s
+.PHONY : SqList.cpp.s
+
 main.obj: main.cpp.obj
 .PHONY : main.obj
 
@@ -161,6 +185,9 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... CPP
+	@echo ... SqList.obj
+	@echo ... SqList.i
+	@echo ... SqList.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

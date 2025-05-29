@@ -147,7 +147,7 @@ void PrintList(LinkList L) {
     printf("\n");
 }
 
-int main() {
+int LB() {
     LinkList L;//声明一个指向单链表的指针。
     InitList(L);
     Empty(L);
@@ -161,5 +161,5 @@ int main() {
     ListDelete(L,3,e);
     PrintList(L);
     printf("被删掉的数据是%d",e);
-     return 0;
+    return 0;
 }
